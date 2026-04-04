@@ -4,7 +4,7 @@ import { Plus, Coffee, RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../context/AuthContext';
 import { posAPI } from '../../services/api';
-import TopOperationsNav from '../../components/pos/TopOperationsNav';
+import Navbar from '../../components/layout/Navbar';
 import POSTerminalCard from '../../components/pos/POSTerminalCard';
 import CreatePOSTerminalModal from '../../components/pos/CreatePOSTerminalModal';
 import PaymentMethodConfigPanel from '../../components/pos/PaymentMethodConfigPanel';
@@ -102,7 +102,7 @@ export default function POSConfigurationPage() {
 
   return (
     <div className="min-h-screen bg-cream-50">
-      <TopOperationsNav user={user} />
+      <Navbar />
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
         {/* Page Header */}

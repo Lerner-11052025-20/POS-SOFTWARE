@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import TopOperationsNav from '../../components/pos/TopOperationsNav';
+import Navbar from '../../components/layout/Navbar';
 import OperationsSubNav from '../../components/operations/OperationsSubNav';
 import OrdersListView from '../../components/operations/OrdersListView';
 import PaymentsGroupedView from '../../components/operations/PaymentsGroupedView';
@@ -18,7 +18,7 @@ export default function OperationsManagementPage() {
 
   return (
     <div className="min-h-screen bg-cream-50">
-      <TopOperationsNav user={user} />
+      <Navbar />
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
         {/* Page Header */}
         <div className="mb-6 animate-fade-in-up">

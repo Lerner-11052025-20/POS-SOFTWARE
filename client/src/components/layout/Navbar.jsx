@@ -1,13 +1,39 @@
 import React from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { LogOut, Coffee } from 'lucide-react';
 
 export default function Navbar({ title = 'Odoo POS Cafe', subtitle = '' }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   if (!user) return null;
+
+  const NavItem = ({ to, label, disabled = false }) => {
+    const isActive = location.pathname.startsWith(to) && to !== '/';
+    
+    if (disabled) {
+      return (
+        <span className="px-4 py-2 rounded-xl text-sm font-semibold text-stone-400 cursor-not-allowed opacity-70">
+          {label} <span className="text-[9px] bg-stone-100 px-1 py-0.5 rounded tracking-widest uppercase ml-1">Soon</span>
+        </span>
+      );
+    }
+
+    return (
+      <Link 
+        to={to} 
+        className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
+          isActive 
+          ? 'text-cafe-600 bg-cafe-50' 
+          : 'text-stone-500 hover:text-cafe-600 hover:bg-cafe-50'
+        }`}
+      >
+        {label}
+      </Link>
+    );
+  };
 
   const handleLogout = async () => {
     await logout();
@@ -31,11 +57,11 @@ export default function Navbar({ title = 'Odoo POS Cafe', subtitle = '' }) {
           </Link>
           
           <nav className="hidden md:flex items-center gap-1 border-l border-stone-100 pl-6 ml-2">
-             <Link to="/dashboard" className="px-4 py-2 rounded-xl text-sm font-semibold text-stone-500 hover:text-cafe-600 hover:bg-cafe-50 transition-all">Dashboard</Link>
-             <Link to="/pos/config" className="px-4 py-2 rounded-xl text-sm font-semibold text-stone-500 hover:text-cafe-600 hover:bg-cafe-50 transition-all">Config</Link>
-             <Link to="/operations" className="px-4 py-2 rounded-xl text-sm font-semibold text-stone-500 hover:text-cafe-600 hover:bg-cafe-50 transition-all">Operations</Link>
-             <Link to="/catalog" className="px-4 py-2 rounded-xl text-sm font-semibold text-stone-500 hover:text-cafe-600 hover:bg-cafe-50 transition-all">Catalog</Link>
-             <Link to="/pos/floor" className="px-4 py-2 rounded-xl text-sm font-semibold text-cafe-600 bg-cafe-50 transition-all">Floor Plan</Link>
+             <NavItem to="/dashboard" label="Dashboard" />
+             <NavItem to="/pos/config" label="Config" />
+             <NavItem to="/operations" label="Operations" />
+             <NavItem to="/catalog" label="Catalog" />
+             <NavItem to="/pos/floor" label="Floor Plan" />
           </nav>
         </div>
 
