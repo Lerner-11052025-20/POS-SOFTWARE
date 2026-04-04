@@ -1,0 +1,30 @@
+# ═══════════════════════════════════════
+# SERVER .gitignore — Express / Node.js
+# ═══════════════════════════════════════
+
+# Dependencies
+node_modules/
+
+# Environment variables (CRITICAL — contains MongoDB URI & JWT secret)
+.env
+.env.local
+.env.production
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# Runtime
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage
+coverage/
+.nyc_output/
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,150 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ═══════════════════════════════════════════
+   ODOO POS CAFE — Global Design System
+   Premium Light Mode | Cafe-Inspired
+   ═══════════════════════════════════════════ */
+
+@layer base {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background-color: #FFFDF7;
+    color: #1A1814;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    line-height: 1.2;
+  }
+
+  ::selection {
+    background-color: rgba(249, 115, 22, 0.2);
+    color: #1A1814;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #D6D3D1;
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #A8A29E;
+  }
+}
+
+@layer components {
+  /* Auth Input Field */
+  .auth-input {
+    @apply w-full px-4 py-3 bg-white border border-stone-200 rounded-xl
+           text-stone-900 text-sm font-body placeholder:text-stone-400
+           transition-all duration-200 ease-out
+           focus:outline-none focus:border-cafe-500 focus:ring-2 focus:ring-cafe-500/15
+           hover:border-stone-300;
+  }
+
+  .auth-input-error {
+    @apply border-red-400 focus:border-red-500 focus:ring-red-500/15;
+  }
+
+  .auth-input-success {
+    @apply border-emerald-400 focus:border-emerald-500 focus:ring-emerald-500/15;
+  }
+
+  /* Auth Label */
+  .auth-label {
+    @apply block text-xs font-semibold text-stone-600 uppercase tracking-wider mb-1.5;
+  }
+
+  /* Auth Button */
+  .auth-btn-primary {
+    @apply w-full py-3.5 px-6 bg-gradient-to-r from-cafe-500 to-cafe-600
+           text-white font-display font-semibold text-sm rounded-xl
+           shadow-btn transition-all duration-300 ease-out
+           hover:shadow-btn-hover hover:from-cafe-600 hover:to-cafe-700
+           hover:-translate-y-0.5
+           active:translate-y-0 active:shadow-btn
+           disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0
+           disabled:hover:shadow-btn
+           focus:outline-none focus:ring-2 focus:ring-cafe-500/30 focus:ring-offset-2;
+  }
+
+  /* Glass Card */
+  .glass-card {
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  /* Role Card */
+  .role-card {
+    @apply relative p-4 rounded-2xl border-2 border-stone-200 bg-white
+           cursor-pointer transition-all duration-300 ease-out
+           hover:border-cafe-300 hover:shadow-card-hover hover:-translate-y-0.5;
+  }
+
+  .role-card-active {
+    @apply border-cafe-500 bg-cafe-50 shadow-card-hover -translate-y-0.5;
+  }
+
+  /* Mode Toggle */
+  .mode-toggle-btn {
+    @apply relative px-6 py-2.5 text-sm font-display font-semibold rounded-xl
+           transition-all duration-300 ease-out z-10;
+  }
+
+  .mode-toggle-active {
+    @apply text-white;
+  }
+
+  .mode-toggle-inactive {
+    @apply text-stone-500 hover:text-stone-700;
+  }
+}
+
+@layer utilities {
+  /* Reduced Motion */
+  @media (prefers-reduced-motion: reduce) {
+    .animate-float-slow,
+    .animate-float-medium,
+    .animate-float-fast,
+    .animate-drift,
+    .animate-pulse-soft,
+    .animate-rotate-slow {
+      animation: none !important;
+    }
+    * {
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+    }
+  }
+
+  .text-gradient-cafe {
+    background: linear-gradient(135deg, #F97316, #FBBF24);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
