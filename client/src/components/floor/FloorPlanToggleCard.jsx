@@ -1,6 +1,19 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 export default function FloorPlanToggleCard({ configs, selectedConfig, onConfigChange, onToggle, isManager }) {
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   if (!selectedConfig) return null;
 
   return (
@@ -20,23 +33,51 @@ export default function FloorPlanToggleCard({ configs, selectedConfig, onConfigC
         </div>
 
         <div className="space-y-4">
-          <div className="flex flex-col">
+          <div className="flex flex-col relative" ref={dropdownRef}>
             <label className="text-xs font-semibold text-stone-500 mb-1.5 ml-0.5">Active POS Workspace</label>
-            <div className="relative group/select">
-              <select 
-                value={selectedConfig._id}
-                onChange={(e) => onConfigChange(e.target.value)}
-                className="w-full bg-stone-50 border border-stone-100 text-stone-800 text-xs font-semibold rounded-xl py-3 px-4 appearance-none hover:bg-stone-100 transition-all focus:ring-2 focus:ring-cafe-500/20 outline-none pr-10 shadow-sm"
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                className={`w-full text-left font-display text-[13px] font-bold rounded-xl py-3 px-4 transition-all duration-200 outline-none pr-10 shadow-sm flex items-center justify-between
+                  ${isDropdownOpen ? 'border-cafe-500 bg-white ring-2 ring-cafe-500/10 shadow-md text-stone-900 border' : 'bg-stone-50 border border-stone-200 text-stone-800 hover:border-cafe-300 hover:bg-white'}
+                `}
               >
-                {configs.map((c) => (
-                  <option key={c._id} value={c._id}>{c.name}</option>
-                ))}
-              </select>
-              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-stone-400 group-hover/select:text-cafe-500 transition-colors">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
+                <span className="truncate">{selectedConfig.name}</span>
+                <span className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                  <svg className={`w-4 h-4 transition-all duration-300 ${isDropdownOpen ? 'rotate-180 text-cafe-500' : 'text-stone-400 group-hover:text-cafe-500'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </span>
+              </button>
+
+              {/* Custom Dropdown Options */}
+              {isDropdownOpen && (
+                <div className="absolute z-50 w-full mt-1.5 bg-white border border-stone-100 rounded-xl shadow-glass overflow-hidden animate-slide-down py-1">
+                  {configs.map((c) => {
+                    const isSelected = selectedConfig._id === c._id;
+                    return (
+                      <button
+                        key={c._id}
+                        onClick={() => {
+                          onConfigChange(c._id);
+                          setIsDropdownOpen(false);
+                        }}
+                        className={`w-full text-left px-4 py-2.5 font-display text-[13px] font-bold transition-colors flex items-center justify-between ${
+                          isSelected 
+                            ? 'bg-cafe-50 text-cafe-700 border-l-2 border-cafe-500' 
+                            : 'text-stone-700 hover:bg-stone-50 hover:text-cafe-600 border-l-2 border-transparent'
+                        }`}
+                      >
+                        <span className="truncate">{c.name}</span>
+                        {isSelected && (
+                           <div className="w-1.5 h-1.5 rounded-full bg-cafe-500 shadow-sm"></div>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
 

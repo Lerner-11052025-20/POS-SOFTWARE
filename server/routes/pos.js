@@ -32,9 +32,17 @@ router.get('/configs/:id', authorize('manager', 'cashier', 'customer'), async (r
   try {
     let config;
     if (req.params.id === 'default') {
-      config = await POSConfig.findOne({ isActive: true })
+      // Prioritize terminals with an open session
+      config = await POSConfig.findOne({ isActive: true, currentSessionId: { $ne: null } })
         .populate('createdBy', 'fullName username')
         .populate('currentSessionId');
+        
+      // Fallback to any active terminal if none have open sessions
+      if (!config) {
+        config = await POSConfig.findOne({ isActive: true })
+          .populate('createdBy', 'fullName username')
+          .populate('currentSessionId');
+      }
     } else {
       config = await POSConfig.findById(req.params.id)
         .populate('createdBy', 'fullName username')

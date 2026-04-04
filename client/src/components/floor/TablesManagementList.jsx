@@ -7,7 +7,7 @@ export default function TablesManagementList({ floor, tables, onRefresh, isManag
   const [showTableModal, setShowTableModal] = useState(false);
 
   const toggleSelect = (id) => {
-    setSelectedIds((prev) => 
+    setSelectedIds((prev) =>
       prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
     );
   };
@@ -51,32 +51,32 @@ export default function TablesManagementList({ floor, tables, onRefresh, isManag
       <div className="p-8 border-b border-stone-50 bg-stone-50/20">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-center gap-5">
-             <div className="w-14 h-14 rounded-2xl bg-amber-500 text-white flex items-center justify-center text-3xl shadow-gold shadow-amber-200/50">
-               🪑
-             </div>
-             <div>
-               <h2 className="text-xl font-display font-bold text-stone-900 leading-tight">
-                 {floor.name} <span className="text-stone-400 font-medium text-xs ml-1">Seating Intelligence</span>
-               </h2>
-               <p className="text-stone-500 text-xs mt-1">
-                 Total Tables: {tables.length} • Total Capacity: {tables.reduce((acc, t) => acc + t.seatsCount, 0)} Seats
-               </p>
-             </div>
+            <div className="w-14 h-14 rounded-2xl bg-amber-500 text-white flex items-center justify-center text-3xl shadow-gold shadow-amber-200/50">
+              🪑
+            </div>
+            <div>
+              <h2 className="text-xl font-display font-bold text-stone-900 leading-tight">
+                {floor.name} <span className="text-stone-400 font-medium text-xs ml-1">Seating Intelligence</span>
+              </h2>
+              <p className="text-stone-500 text-xs mt-1">
+                Total Tables: {tables.length} • Total Capacity: {tables.reduce((acc, t) => acc + t.seatsCount, 0)} Seats
+              </p>
+            </div>
           </div>
           <div className="flex items-center gap-3">
-             {isManager && (
-               <>
-                 <button onClick={onEditFloor} className="px-4 py-2.5 text-xs font-semibold text-stone-600 hover:bg-stone-50 rounded-xl transition-all">
-                   Manage Floor Settings
-                 </button>
-                 <button 
-                   onClick={() => setShowTableModal(true)}
-                   className="px-6 py-3 bg-cafe-600 text-white text-xs font-semibold rounded-xl shadow-gold hover:bg-cafe-700 hover:scale-[1.02] active:scale-95 transition-all"
-                 >
-                   + Add New Table
-                 </button>
-               </>
-             )}
+            {isManager && (
+              <>
+                <button onClick={onEditFloor} className="px-4 py-2.5 text-xs font-semibold text-stone-600 hover:bg-stone-50 rounded-xl transition-all">
+                  Manage Floor Settings
+                </button>
+                <button
+                  onClick={() => setShowTableModal(true)}
+                  className="px-6 py-3 bg-cafe-600 text-white text-xs font-semibold rounded-xl shadow-gold hover:bg-cafe-700 hover:scale-[1.02] active:scale-95 transition-all"
+                >
+                  + Add New Table
+                </button>
+              </>
+            )}
           </div>
         </div>
 
@@ -87,13 +87,13 @@ export default function TablesManagementList({ floor, tables, onRefresh, isManag
               <span className="text-cafe-600 font-bold">{selectedIds.length}</span> Objects Selected
             </p>
             <div className="flex items-center gap-3">
-              <button 
+              <button
                 onClick={handleBulkDuplicate}
                 className="px-5 py-2 bg-white text-stone-600 text-xs font-semibold hover:bg-stone-50 rounded-xl transition-all border border-stone-200 shadow-sm"
               >
                 Duplicate Selection
               </button>
-              <button 
+              <button
                 onClick={handleBulkDelete}
                 className="px-5 py-2 bg-white text-rose-600 text-xs font-semibold hover:bg-rose-50 hover:border-rose-200 rounded-xl transition-all border border-stone-200 shadow-sm"
               >
@@ -118,12 +118,12 @@ export default function TablesManagementList({ floor, tables, onRefresh, isManag
           </thead>
           <tbody className="divide-y divide-stone-50">
 
-            
+
             {tables.length === 0 ? (
               <tr>
                 <td colSpan="5" className="p-20 text-center animate-fade-in">
-                   <div className="text-4xl opacity-30 grayscale mb-4">🪑</div>
-                   <p className="text-sm font-semibold text-stone-400 max-w-xs mx-auto">This architectural zone has no defined seating yet. Add tables to enable dine-in floor tracking.</p>
+                  <div className="text-4xl opacity-30 grayscale mb-4">🪑</div>
+                  <p className="text-sm font-semibold text-stone-400 max-w-xs mx-auto">This architectural zone has no defined seating yet. Add tables to enable dine-in floor tracking.</p>
                 </td>
               </tr>
             ) : (
@@ -131,8 +131,8 @@ export default function TablesManagementList({ floor, tables, onRefresh, isManag
                 <tr key={table._id} className={`group hover:bg-stone-50/50 transition-all ${selectedIds.includes(table._id) ? 'bg-cafe-50/20' : ''}`}>
                   {isManager && (
                     <td className="px-8 py-6">
-                      <input 
-                        type="checkbox" 
+                      <input
+                        type="checkbox"
                         checked={selectedIds.includes(table._id)}
                         onChange={() => toggleSelect(table._id)}
                         className="w-5 h-5 rounded-lg border-2 border-stone-200 text-cafe-600 focus:ring-cafe-500/20 transition-all cursor-pointer"
@@ -141,40 +141,37 @@ export default function TablesManagementList({ floor, tables, onRefresh, isManag
                   )}
                   <td className="px-8 py-6">
                     <div className="flex items-center gap-4">
-                       <div className="w-10 h-10 rounded-2xl bg-white border border-stone-100 flex items-center justify-center font-bold text-sm text-stone-800 shadow-sm group-hover:bg-cafe-50 transition-all group-hover:scale-110 group-hover:border-cafe-100 group-hover:text-cafe-700">
-                         {table.tableNumber}
-                       </div>
-                       <div>
-                         <p className="text-sm font-semibold text-stone-800">{table.tableNumber}</p>
-                         <p className="text-xs text-stone-400 mt-0.5">Dining Asset</p>
-                       </div>
+                      <div className="w-11 h-11 rounded-full bg-cafe-50 border border-cafe-100 flex items-center justify-center font-display font-bold text-sm text-cafe-700 shadow-inner overflow-hidden group-hover:scale-105 transition-all">
+                        {table.tableNumber}
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-stone-800 leading-tight">Dining Asset</p>
+                      </div>
                     </div>
                   </td>
                   <td className="px-8 py-6">
                     <div className="flex items-center gap-1.5">
-                       <span className="text-xs font-bold text-stone-800 px-2 py-0.5 bg-stone-100 rounded-md">{table.seatsCount}</span>
-                       <span className="text-xs text-stone-500">Seats</span>
+                      <span className="text-xs font-bold text-stone-800 px-2 py-0.5 bg-stone-100 rounded-md">{table.seatsCount}</span>
+                      <span className="text-xs text-stone-500">Seats</span>
                     </div>
                   </td>
                   <td className="px-8 py-6">
-                    <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full border ${
-                      table.isActive 
-                      ? 'bg-emerald-50 border-emerald-100 text-emerald-700' 
+                    <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full border ${table.isActive
+                      ? 'bg-emerald-50 border-emerald-100 text-emerald-700'
                       : 'bg-stone-100 border-stone-200 text-stone-500 grayscale'
-                    }`}>
+                      }`}>
                       <div className={`w-1.5 h-1.5 rounded-full ${table.isActive ? 'bg-emerald-500 animate-pulse' : 'bg-stone-400'}`}></div>
                       <span className="text-xs font-medium">{table.isActive ? 'Active Plan' : 'Maintenance'}</span>
                     </div>
                   </td>
                   <td className="px-8 py-6 text-right">
                     {isManager && (
-                      <button 
+                      <button
                         onClick={() => handleToggleActive(table)}
-                        className={`text-xs font-semibold transition-all ${
-                          table.isActive 
-                          ? 'text-stone-400 hover:text-stone-600' 
+                        className={`text-xs font-semibold transition-all ${table.isActive
+                          ? 'text-stone-400 hover:text-stone-600'
                           : 'text-emerald-600 hover:text-emerald-700'
-                        }`}
+                          }`}
                       >
                         {table.isActive ? 'Disable Unit' : 'Restore Asset'}
                       </button>
@@ -187,8 +184,8 @@ export default function TablesManagementList({ floor, tables, onRefresh, isManag
         </table>
       </div>
 
-      <TableFormModal 
-        isOpen={showTableModal} 
+      <TableFormModal
+        isOpen={showTableModal}
         onClose={() => setShowTableModal(false)}
         onSuccess={() => {
           setShowTableModal(false);

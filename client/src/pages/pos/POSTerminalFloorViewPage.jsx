@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { posAPI, floorsAPI, tablesAPI } from '../../services/api';
 import Navbar from '../../components/layout/Navbar';
+import { useAuth } from '../../context/AuthContext';
 import { formatCurrency } from '../../utils/format';
 import {
   Monitor, LayoutGrid, Users, Coffee, ArrowRight,
@@ -12,10 +13,10 @@ import toast from 'react-hot-toast';
 
 const STATUS_MAP = {
   available: { label: 'Available', color: 'emerald', icon: CheckCircle2 },
-  occupied:  { label: 'Occupied',  color: 'stone',   icon: XCircle },
-  reserved:  { label: 'Reserved',  color: 'amber',   icon: Clock },
-  booked:    { label: 'Booked',    color: 'amber',   icon: Clock },
-  inactive:  { label: 'Inactive',  color: 'stone',   icon: AlertCircle },
+  occupied: { label: 'Occupied', color: 'stone', icon: XCircle },
+  reserved: { label: 'Reserved', color: 'amber', icon: Clock },
+  booked: { label: 'Booked', color: 'amber', icon: Clock },
+  inactive: { label: 'Inactive', color: 'stone', icon: AlertCircle },
 };
 
 function FloorLoadingSkeleton() {
@@ -39,6 +40,20 @@ function NoTablesState({ floorName }) {
       </h3>
       <p className="text-stone-400 text-sm max-w-xs leading-relaxed">
         Tables haven't been added to this floor yet. Please check another floor or come back shortly.
+      </p>
+    </div>
+  );
+}
+
+function ClosedState() {
+  return (
+    <div className="bg-white rounded-2xl shadow-card border border-stone-100 p-16 text-center animate-fade-in">
+      <div className="w-20 h-20 bg-stone-50 rounded-full flex items-center justify-center mx-auto mb-5">
+        <Coffee className="w-9 h-9 text-stone-200" />
+      </div>
+      <h3 className="text-xl font-display font-bold text-stone-800 mb-2">Cafe is Currently Closed</h3>
+      <p className="text-stone-400 text-sm max-w-sm mx-auto leading-relaxed">
+        We're not taking any orders right now as our POS session is offline. Please check back later!
       </p>
     </div>
   );
@@ -89,42 +104,38 @@ function TableCard({ table, isSelected, onSelect, disabled }) {
       title={isAvailable ? `Select Table ${table.tableNumber}` : `Table ${table.tableNumber} — ${meta.label}`}
     >
       {/* Container for Pill and Dot */}
-      <div className="relative inline-flex items-center justify-center mb-4 mt-2">
+      <div className="relative inline-flex items-center justify-center mb-3 mt-1.5">
         {/* Table Number Pill */}
-        <div className={`px-6 py-2.5 rounded-[100px] font-display font-medium text-2xl tracking-tight transition-colors duration-300 ${
-          isSelected ? 'bg-cafe-500 text-white' :
+        <div className={`px-5 py-2 rounded-[100px] font-display font-medium text-xl tracking-tight transition-colors duration-300 ${isSelected ? 'bg-cafe-500 text-white' :
           isAvailable ? 'bg-[#F4F4F5] text-stone-800' :
-          'bg-stone-100 text-stone-400'
-        }`}>
+            'bg-stone-100 text-stone-400'
+          }`}>
           {table.tableNumber}
         </div>
-        
+
         {/* Floating Top-Right Status Dot */}
-        <div className={`absolute -top-1 -right-4 w-3.5 h-3.5 rounded-full ${
-          isSelected ? 'bg-cafe-700' :
+        <div className={`absolute -top-0.5 -right-3.5 w-3 h-3 rounded-full ${isSelected ? 'bg-cafe-700' :
           status === 'available' ? 'bg-[#66bb6a]' :
-          status === 'occupied' ? 'bg-stone-400' :
-          'bg-amber-400'
-        }`} />
+            status === 'occupied' ? 'bg-stone-400' :
+              'bg-amber-400'
+          }`} />
       </div>
 
       {/* Seat Count */}
-      <div className={`flex items-center gap-2 text-[15px] font-medium transition-colors mb-2 ${
-        isSelected ? 'text-cafe-700' :
+      <div className={`flex items-center gap-1.5 text-sm font-medium transition-colors mb-1.5 ${isSelected ? 'text-cafe-700' :
         isAvailable ? 'text-stone-500' :
-        'text-stone-400'
-      }`}>
-        <Users className="w-4 h-4 opacity-80" />
+          'text-stone-400'
+        }`}>
+        <Users className="w-4 h-4 opacity-75" />
         <span>{table.seatsCount} {table.seatsCount === 1 ? 'seat' : 'seats'}</span>
       </div>
 
       {/* Status Label */}
-      <span className={`text-[15px] font-medium tracking-wide ${
-        isSelected ? 'text-cafe-600 font-bold' :
+      <span className={`text-sm font-medium tracking-wide ${isSelected ? 'text-cafe-600 font-bold' :
         status === 'available' ? 'text-[#047857]' :
-        status === 'occupied' ? 'text-stone-400' :
-        'text-amber-500'
-      }`}>
+          status === 'occupied' ? 'text-stone-400' :
+            'text-amber-500'
+        }`}>
         {isSelected ? 'Selected' : meta.label}
       </span>
     </button>
@@ -134,6 +145,9 @@ function TableCard({ table, isSelected, onSelect, disabled }) {
 export default function POSTerminalFloorViewPage() {
   const { configId } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
+
+  const isCustomer = user?.role === 'customer';
 
   const [config, setConfig] = useState(null);
   const [floors, setFloors] = useState([]);
@@ -260,46 +274,50 @@ export default function POSTerminalFloorViewPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
         {/* Terminal Info Card */}
-        <div className="bg-white rounded-2xl shadow-card border border-stone-100 p-5 sm:p-6 mb-8 animate-fade-in-up">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-cafe-500 to-amber-400 rounded-xl flex items-center justify-center shadow-btn flex-shrink-0">
-                <Monitor className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h2 className="text-lg font-display font-bold text-stone-900">
-                  {config?.name || 'Odoo Cafe Terminal'}
-                </h2>
-                <div className="flex items-center gap-3 mt-0.5">
-                  <span className="flex items-center gap-1 text-xs text-emerald-600 font-medium">
-                    <Wifi className="w-3 h-3" /> Online
-                  </span>
-                  {config?.lastSessionOpenedAt && (
-                    <span className="text-xs text-stone-400">
-                      Last session: {new Date(config.lastSessionOpenedAt).toLocaleDateString()}
+        {(!isCustomer || !!config?.currentSessionId) && (
+          <div className="bg-white rounded-2xl shadow-card border border-stone-100 p-5 sm:p-6 mb-8 animate-fade-in-up">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-gradient-to-br from-cafe-500 to-amber-400 rounded-xl flex items-center justify-center shadow-btn flex-shrink-0">
+                  <Monitor className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-display font-bold text-stone-900">
+                    {config?.name || 'Odoo Cafe Terminal'}
+                  </h2>
+                  <div className="flex items-center gap-3 mt-0.5">
+                    <span className="flex items-center gap-1 text-xs text-emerald-600 font-medium">
+                      <Wifi className="w-3 h-3" /> Online
                     </span>
-                  )}
+                    {config?.lastSessionOpenedAt && (
+                      <span className="text-xs text-stone-400">
+                        Last session: {new Date(config.lastSessionOpenedAt).toLocaleDateString()}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="px-3 py-1.5 bg-stone-50 border border-stone-100 rounded-lg text-xs font-semibold text-stone-500 flex items-center gap-1.5">
-                <LayoutGrid className="w-3.5 h-3.5" />
-                {floors.length} {floors.length === 1 ? 'Floor' : 'Floors'}
-              </span>
-              <button
-                onClick={() => fetchTables(selectedFloor?._id)}
-                className="p-2 rounded-lg text-stone-400 hover:text-cafe-500 hover:bg-cafe-50 transition-colors"
-                title="Refresh tables"
-              >
-                <RefreshCw className="w-4 h-4" />
-              </button>
+              <div className="flex items-center gap-2">
+                <span className="px-3 py-1.5 bg-stone-50 border border-stone-100 rounded-lg text-xs font-semibold text-stone-500 flex items-center gap-1.5">
+                  <LayoutGrid className="w-3.5 h-3.5" />
+                  {floors.length} {floors.length === 1 ? 'Floor' : 'Floors'}
+                </span>
+                <button
+                  onClick={() => fetchTables(selectedFloor?._id)}
+                  className="p-2 rounded-lg text-stone-400 hover:text-cafe-500 hover:bg-cafe-50 transition-colors"
+                  title="Refresh tables"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Floor Switcher + Table Canvas Layout */}
-        {floors.length === 0 ? (
+        {isCustomer && !config?.currentSessionId ? (
+          <ClosedState />
+        ) : floors.length === 0 ? (
           <div className="bg-white rounded-2xl shadow-card border border-stone-100 p-16 text-center animate-fade-in">
             <div className="w-20 h-20 bg-stone-50 rounded-full flex items-center justify-center mx-auto mb-5">
               <Layers className="w-9 h-9 text-stone-200" />
@@ -324,15 +342,13 @@ export default function POSTerminalFloorViewPage() {
                     <button
                       key={floor._id}
                       onClick={() => handleFloorSwitch(floor)}
-                      className={`whitespace-nowrap flex items-center gap-3 px-4 py-3.5 rounded-xl text-left transition-all duration-200 border flex-shrink-0 ${
-                        isActive
-                          ? 'bg-cafe-50 border-cafe-200 text-cafe-800 shadow-sm'
-                          : 'bg-white border-stone-100 text-stone-600 hover:border-stone-200 hover:bg-stone-50'
-                      }`}
+                      className={`whitespace-nowrap flex items-center gap-3 px-4 py-3.5 rounded-xl text-left transition-all duration-200 border flex-shrink-0 ${isActive
+                        ? 'bg-cafe-50 border-cafe-200 text-cafe-800 shadow-sm'
+                        : 'bg-white border-stone-100 text-stone-600 hover:border-stone-200 hover:bg-stone-50'
+                        }`}
                     >
-                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-display font-bold text-xs transition-colors ${
-                        isActive ? 'bg-cafe-500 text-white' : 'bg-stone-100 text-stone-400'
-                      }`}>
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-display font-bold text-xs transition-colors ${isActive ? 'bg-cafe-500 text-white' : 'bg-stone-100 text-stone-400'
+                        }`}>
                         {i === 0 ? 'G' : i}
                       </div>
                       <div className="flex-1 min-w-0">
@@ -406,14 +422,14 @@ export default function POSTerminalFloorViewPage() {
           <div className="bg-white/95 backdrop-blur-md border-t border-stone-200 shadow-glass-lg">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between gap-4">
               <div className="flex items-center gap-4 min-w-0">
-                <div className="w-10 h-10 bg-cafe-50 border border-cafe-200 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <span className="text-sm font-display font-bold text-cafe-600">{selectedTable.tableNumber}</span>
+                <div className="w-11 h-11 bg-cafe-50 border border-cafe-100 rounded-full flex items-center justify-center flex-shrink-0 shadow-inner overflow-hidden">
+                  <span className="text-sm font-display font-bold text-cafe-700">{selectedTable.tableNumber}</span>
                 </div>
                 <div className="min-w-0">
                   <p className="text-sm font-display font-bold text-stone-900 truncate">
-                    Table {selectedTable.tableNumber}
+                    Dining Asset
                   </p>
-                  <p className="text-xs text-stone-400">
+                  <p className="text-xs text-stone-500">
                     {selectedFloor?.name} · {selectedTable.seatsCount} seats
                   </p>
                 </div>
