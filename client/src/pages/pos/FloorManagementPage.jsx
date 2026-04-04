@@ -133,9 +133,9 @@ export default function FloorManagementPage() {
                   {isManager && (
                     <button 
                       onClick={() => { setEditingFloor(null); setShowFloorModal(true); }}
-                      className="text-[10px] font-semibold bg-cafe-500 text-white px-3 py-1.5 rounded-full hover:bg-cafe-600 transition-all shadow-sm"
+                      className="text-xs font-medium bg-cafe-500 text-white px-3 py-1.5 rounded-lg hover:bg-cafe-600 transition-all shadow-sm"
                     >
-                      + ADD FLOOR
+                      + Add Floor
                     </button>
                   )}
                 </div>
@@ -165,7 +165,7 @@ export default function FloorManagementPage() {
                          <p className={`text-sm font-semibold ${selectedFloor?._id === floor._id ? 'text-cafe-800' : 'text-stone-600'}`}>
                            {floor.name}
                          </p>
-                         <p className="text-[10px] text-stone-400 uppercase tracking-tighter">
+                         <p className="text-xs text-stone-500 font-medium">
                            Active Seating Plan
                          </p>
                        </div>

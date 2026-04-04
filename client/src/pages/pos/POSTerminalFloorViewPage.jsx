@@ -121,7 +121,7 @@ function TableCard({ table, isSelected, onSelect, disabled }) {
       </div>
 
       {/* Status Label */}
-      <span className={`mt-1.5 text-[10px] font-semibold uppercase tracking-wider ${
+      <span className={`mt-1.5 text-xs font-medium ${
         isSelected ? 'text-cafe-600' :
         status === 'available' ? 'text-emerald-600' :
         status === 'occupied' ? 'text-stone-400' :
@@ -321,7 +321,7 @@ export default function POSTerminalFloorViewPage() {
 
             {/* Floor Switcher Panel */}
             <div className="space-y-4 animate-fade-in-up" style={{ animationDelay: '100ms', animationFillMode: 'backwards' }}>
-              <h3 className="text-xs font-semibold text-stone-400 uppercase tracking-wider px-1">Floors</h3>
+              <h3 className="text-sm font-semibold text-stone-500 px-1">Floors</h3>
 
               {/* Desktop: vertical list / Mobile: horizontal scroll */}
               <div className="flex flex-row lg:flex-col gap-2 overflow-x-auto lg:overflow-visible pb-3 lg:pb-0 scrollbar-none">
