@@ -18,7 +18,7 @@ const getProductFallbackImage = (name, categoryName = '') => {
   if (n.includes('water')) return 'https://images.unsplash.com/photo-1523362628745-0c100150b504?auto=format&fit=crop&q=80&w=400';
   if (n.includes('sprite') || n.includes('lime') || n.includes('dew')) return 'https://images.unsplash.com/photo-1625772452859-1e03c58c1ebb?auto=format&fit=crop&q=80&w=400';
   if (n.includes('cola') || n.includes('thumbs up') || n.includes('pepsi') || n.includes('soda')) return 'https://images.unsplash.com/photo-1554866585-cd94860890b7?auto=format&fit=crop&q=80&w=400';
-  if (n.includes('maza') || n.includes('maaza') || n.includes('mango') || n.includes('juice') || n.includes('slush')) return 'https://images.unsplash.com/photo-1622597467836-f30896062f6b?auto=format&fit=crop&q=80&w=400';
+  if (n.includes('maza') || n.includes('maaza') || n.includes('mango') || n.includes('juice') || n.includes('slush')) return 'https://images.unsplash.com/photo-1628200508115-3f23c3be57b3?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTl8fHNvZnQlMjBkcmlua3xlbnwwfHwwfHx8MA%3D%3D';
   if (n.includes('tea') || n.includes('chai')) return 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&q=80&w=400';
   if (n.includes('coffee') || n.includes('espresso') || n.includes('latte') || n.includes('mocha')) return 'https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&q=80&w=400';
   if (n.includes('drink') || n.includes('beverage')) return 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&q=80&w=400';
