@@ -44,9 +44,9 @@ router.get('/:id', authorize('manager', 'cashier'), async (req, res) => {
 });
 
 // POST /api/orders — Create order
-router.post('/', authorize('manager', 'cashier'), async (req, res) => {
+router.post('/', authorize('manager', 'cashier', 'customer'), async (req, res) => {
   try {
-    const { customerName, customer, sessionName, session, lines, paymentMethod } = req.body;
+    const { customerName, customer, sessionName, session, lines, paymentMethod, table, floor, notes } = req.body;
     const order = await Order.create({
       customerName: customerName || 'Walk-in Customer',
       customer: customer || null,
@@ -54,6 +54,9 @@ router.post('/', authorize('manager', 'cashier'), async (req, res) => {
       session: session || null,
       lines: lines || [],
       paymentMethod: paymentMethod || '',
+      table: table || null,
+      floor: floor || null,
+      notes: notes || '',
       createdBy: req.user._id,
     });
 

@@ -8,6 +8,7 @@ const orderLineSchema = new mongoose.Schema({
   uom: { type: String, default: 'Unit', trim: true },
   subtotal: { type: Number, default: 0 },
   total: { type: Number, default: 0 },
+  notes: { type: String, default: '', trim: true },
 });
 
 const orderSchema = new mongoose.Schema(
@@ -29,6 +30,17 @@ const orderSchema = new mongoose.Schema(
       default: null,
     },
     customerName: { type: String, default: 'Walk-in Customer' },
+    table: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Table',
+      default: null,
+    },
+    floor: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Floor',
+      default: null,
+    },
+    notes: { type: String, default: '', trim: true },
     status: {
       type: String,
       enum: ['draft', 'paid', 'cancelled'],

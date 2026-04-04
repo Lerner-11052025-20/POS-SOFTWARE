@@ -1,196 +1,447 @@
-import React, { useState, useEffect } from 'react';
-import { categoriesAPI, productsAPI } from '../../services/api';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { categoriesAPI, productsAPI, ordersAPI } from '../../services/api';
 import Navbar from '../../components/layout/Navbar';
 import { formatCurrency } from '../../utils/format';
-import { Search, Info, Grid, List as ListIcon, ChevronRight } from 'lucide-react';
+import {
+  Search, Info, Grid, List as ListIcon, ChevronRight,
+  Plus, Minus, MessageSquare, Trash2, Send, ShoppingBag, ArrowLeft
+} from 'lucide-react';
+import toast from 'react-hot-toast';
+
+const getProductFallbackImage = (name) => {
+  if (!name) return null;
+  const n = name.toLowerCase();
+  if (n.includes('water')) return 'https://images.unsplash.com/photo-1530711654140-23ef9ad45094?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fHdhdGVyJTIwYm90dGxlfGVufDB8fDB8fHww';
+  if (n.includes('sprite') || n.includes('cola') || n.includes('soda')) return 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&q=80&w=400';
+  if (n.includes('tea')) return 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&q=80&w=400';
+  if (n.includes('coffee') || n.includes('espresso') || n.includes('latte') || n.includes('mocha')) return 'https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&q=80&w=400';
+  if (n.includes('burger')) return 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&q=80&w=400';
+  if (n.includes('pizza')) return 'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&q=80&w=400';
+  if (n.includes('sandwitch') || n.includes('sandwich')) return 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&q=80&w=400';
+  if (n.includes('cake') || n.includes('dessert') || n.includes('sweet')) return 'https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&q=80&w=400';
+  
+  // Generic cafe food/drink fallback if no match
+  return 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&q=80&w=400';
+};
 
 export default function CustomerMenuPage() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { table, floor } = location.state || {};
+
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [viewMode, setViewMode] = useState('grid'); // grid or list
+  
+  const [orderLines, setOrderLines] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showMobileCart, setShowMobileCart] = useState(false);
 
   useEffect(() => {
+    if (!table) {
+      navigate('/pos/terminal/default');
+      return;
+    }
+
     const fetchData = async () => {
       try {
         setLoading(true);
         const [catRes, prodRes] = await Promise.all([
           categoriesAPI.getAll(),
-          productsAPI.getAll({ active: 'true' }) // The route now enforces isActive:true for customers
+          productsAPI.getAll({ active: 'true' })
         ]);
         setCategories(catRes.data.categories || []);
         setProducts(prodRes.data.products || []);
       } catch (err) {
         console.error('Fetch menu error:', err);
+        toast.error('Failed to load menu');
       } finally {
         setLoading(false);
       }
     };
     fetchData();
-  }, []);
+  }, [table, navigate]);
 
-  const filteredProducts = products.filter(p => {
-    const matchesCategory = activeCategory === 'all' || p.category?._id === activeCategory;
-    const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.description?.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
+  const filteredProducts = useMemo(() => {
+    return products.filter(p => {
+      const matchesCategory = activeCategory === 'all' || p.category?._id === activeCategory;
+      const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        p.description?.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesCategory && matchesSearch;
+    });
+  }, [products, activeCategory, searchQuery]);
+
+  const handleAddProduct = (product) => {
+    setOrderLines(prev => {
+      const existingLineIndex = prev.findIndex(line => line.product._id === product._id && !line.notes);
+      if (existingLineIndex >= 0) {
+        const newLines = [...prev];
+        const line = newLines[existingLineIndex];
+        newLines[existingLineIndex] = {
+          ...line,
+          quantity: line.quantity + 1,
+          subtotal: (line.quantity + 1) * line.unitPrice
+        };
+        return newLines;
+      }
+      return [...prev, {
+        product: product,
+        quantity: 1,
+        unitPrice: product.salePrice,
+        subtotal: product.salePrice,
+        notes: ''
+      }];
+    });
+    // Visual feedback
+    toast.success(`${product.name} added`);
+  };
+
+  const handleUpdateQuantity = (index, delta) => {
+    setOrderLines(prev => {
+      const newLines = [...prev];
+      const line = newLines[index];
+      const newQuantity = line.quantity + delta;
+      
+      if (newQuantity <= 0) {
+        newLines.splice(index, 1);
+      } else {
+        newLines[index] = {
+          ...line,
+          quantity: newQuantity,
+          subtotal: newQuantity * line.unitPrice
+        };
+      }
+      return newLines;
+    });
+  };
+
+  const handleUpdateNotes = (index, notes) => {
+    setOrderLines(prev => {
+      const newLines = [...prev];
+      newLines[index].notes = notes;
+      return newLines;
+    });
+  };
+
+  const handleSendOrder = async () => {
+    if (orderLines.length === 0) return;
+    setIsSubmitting(true);
+    try {
+      const payload = {
+        table: table._id,
+        floor: floor?._id,
+        lines: orderLines.map(l => ({
+          product: l.product.name,
+          quantity: l.quantity,
+          unitPrice: l.unitPrice,
+          subtotal: l.subtotal,
+          notes: l.notes,
+        })),
+      };
+      const res = await ordersAPI.create(payload);
+      if (res.data.success) {
+        toast.success(`Order placed for Table ${table.tableNumber}`);
+        setOrderLines([]);
+        setShowMobileCart(false);
+      }
+    } catch (err) {
+      toast.error('Failed to submit order');
+      console.error(err);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const orderTotal = orderLines.reduce((sum, line) => sum + line.subtotal, 0);
+  const totalItems = orderLines.reduce((sum, line) => sum + line.quantity, 0);
 
   if (loading) {
     return (
       <div className="min-h-screen bg-cream-50 flex items-center justify-center">
         <div className="animate-pulse flex flex-col items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-cafe-500/10 border-4 border-cafe-500 border-t-transparent animate-spin"></div>
-          <p className="text-stone-400 font-display font-bold uppercase tracking-widest text-xs">Odoo POS Cafe — Cataloging</p>
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-cafe-500 to-amber-400 border border-cafe-600 animate-pulse-soft"></div>
+          <p className="text-stone-500 font-display font-semibold tracking-wide text-sm">Preparing Menu...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-cream-50 pb-20">
-      <Navbar title="Coffee Catalog" subtitle="Live Experience" />
+    <div className="min-h-screen flex flex-col bg-cream-50 overflow-hidden font-body">
+      {/* Context Header */}
+      <div className="bg-white border-b border-stone-100 px-6 py-3 shrink-0 shadow-sm z-30">
+        <div className="max-w-screen-2xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={() => navigate('/pos/terminal/default')}
+              className="p-2 -ml-2 rounded-lg text-stone-400 hover:text-cafe-600 hover:bg-stone-50 transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <div className="flex flex-col">
+              <span className="text-[10px] font-bold tracking-widest text-stone-400 uppercase">
+                {floor?.name || 'Main Floor'}
+              </span>
+              <h2 className="text-lg font-display font-black text-stone-900 tracking-tight leading-none mt-1">
+                Table {table?.tableNumber}
+              </h2>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 rounded-full border border-emerald-100">
+            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse-soft" />
+            <span className="text-xs font-semibold text-emerald-700">Active Order</span>
+          </div>
+        </div>
+      </div>
 
-      {/* Header & Controls */}
-      <div className="bg-white border-b border-stone-100 px-6 py-10 sticky top-[64px] z-40 shadow-sm animate-fade-in">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8">
-            <div className="flex-1 max-w-xl">
-              <h1 className="text-3xl font-display font-black text-stone-900 tracking-tight mb-2">Taste the <span className="text-cafe-600">Exceptional</span></h1>
-              <p className="text-xs text-stone-400 font-bold tracking-widest uppercase mb-6 leading-relaxed">Artisan Selection • Handcrafted Daily</p>
-
-              <div className="relative group">
+      <div className="flex flex-1 overflow-hidden max-w-screen-2xl mx-auto w-full">
+        {/* Left Side: Product Browsing */}
+        <main className="flex-1 flex flex-col min-w-0 bg-cream-50 z-10 relative shadow-[1px_0_0_0_rgba(0,0,0,0.03)]">
+          {/* Header & Controls */}
+          <div className="bg-white border-b border-stone-100 px-6 py-6 shrink-0 z-20">
+            <div className="flex flex-col gap-5">
+              <div className="relative group max-w-md">
                 <input
                   type="text"
-                  placeholder="Search by name or description..."
-                  className="w-full bg-stone-50 border border-stone-100 rounded-2xl py-4 px-12 text-stone-800 placeholder-stone-400 focus:bg-white focus:ring-4 focus:ring-cafe-500/10 focus:border-cafe-500 transition-all outline-none font-semibold text-sm shadow-inner"
+                  placeholder="Search products..."
+                  className="w-full bg-stone-50 border border-stone-200 rounded-xl py-3.5 px-11 text-stone-800 placeholder-stone-400 focus:bg-white focus:ring-4 focus:ring-cafe-500/10 focus:border-cafe-500 transition-all outline-none font-medium text-sm"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-stone-300 group-focus-within:text-cafe-500 transition-colors" />
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 group-focus-within:text-cafe-500 transition-colors" />
               </div>
-            </div>
 
-            <div className="flex flex-col gap-4">
               {/* Categories Selection */}
-              <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-none">
+              <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
                 <button
                   onClick={() => setActiveCategory('all')}
-                  className={`whitespace-nowrap px-6 py-2.5 rounded-full text-[11px] font-black uppercase tracking-widest transition-all border ${activeCategory === 'all'
-                      ? 'bg-stone-900 border-stone-900 text-white shadow-xl translate-y-[-2px]'
-                      : 'bg-white border-stone-100 text-stone-400 hover:border-stone-300'
-                    }`}
+                  className={`whitespace-nowrap px-5 py-2 rounded-lg text-xs font-bold transition-all border ${
+                    activeCategory === 'all'
+                      ? 'bg-stone-900 border-stone-900 text-white shadow-md'
+                      : 'bg-white border-stone-200 text-stone-500 hover:bg-stone-50'
+                  }`}
                 >
-                  All Delights
+                  All Items
                 </button>
                 {categories.map(cat => (
                   <button
                     key={cat._id}
                     onClick={() => setActiveCategory(cat._id)}
-                    className={`whitespace-nowrap px-6 py-2.5 rounded-full text-[11px] font-black uppercase tracking-widest transition-all border ${activeCategory === cat._id
-                        ? 'bg-cafe-600 border-cafe-600 text-white shadow-gold-sm translate-y-[-2px]'
-                        : 'bg-white border-stone-100 text-stone-400 hover:border-stone-300'
-                      }`}
+                    className={`whitespace-nowrap px-5 py-2 rounded-lg text-xs font-bold transition-all border ${
+                      activeCategory === cat._id
+                        ? 'bg-cafe-600 border-cafe-600 text-white shadow-md'
+                        : 'bg-white border-stone-200 text-stone-500 hover:bg-stone-50'
+                    }`}
                   >
                     {cat.name}
                   </button>
                 ))}
               </div>
+            </div>
+          </div>
 
-              <div className="flex items-center justify-between lg:justify-end gap-6 border-t lg:border-none pt-4 lg:pt-0">
-                <div className="flex bg-stone-100 p-1 rounded-xl shadow-inner border border-stone-200">
-                  <button onClick={() => setViewMode('grid')} className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white shadow-sm text-cafe-600' : 'text-stone-400'}`}><Grid className="w-4 h-4" /></button>
-                  <button onClick={() => setViewMode('list')} className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-white shadow-sm text-cafe-600' : 'text-stone-400'}`}><ListIcon className="w-4 h-4" /></button>
+          <div className="flex-1 overflow-y-auto p-6 scrollbar-none pb-32 lg:pb-6">
+            {filteredProducts.length === 0 ? (
+              <div className="bg-white rounded-[2rem] p-16 text-center border border-dashed border-stone-200 shadow-sm mt-8">
+                <div className="w-16 h-16 bg-stone-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Search className="w-6 h-6 text-stone-300" />
                 </div>
-                <div className="text-[10px] font-black text-stone-400 uppercase tracking-widest">
-                  Showing {filteredProducts.length} Results
-                </div>
+                <h3 className="text-lg font-display font-black text-stone-800">No Items Found</h3>
+                <p className="text-stone-400 text-xs mt-2 font-medium">Try checking a different category.</p>
               </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <main className="max-w-7xl mx-auto px-6 py-12">
-        {filteredProducts.length === 0 ? (
-          <div className="bg-white rounded-[2rem] p-24 text-center border border-dashed border-stone-200 animate-fade-in shadow-sm">
-            <div className="w-20 h-20 bg-stone-50 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Search className="w-8 h-8 text-stone-200" />
-            </div>
-            <h3 className="text-xl font-display font-black text-stone-900 leading-tight">No Items Found</h3>
-            <p className="text-stone-400 text-xs mt-3 max-w-sm mx-auto leading-relaxed font-semibold uppercase tracking-widest">
-              Your palette is unique. Try adjusting your search or category filters to find our signature blends.
-            </p>
-          </div>
-        ) : (
-          viewMode === 'grid' ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-              {filteredProducts.map((product) => (
-                <div key={product._id} className="group bg-white rounded-[2rem] overflow-hidden border border-stone-100 shadow-card hover:shadow-2xl hover:shadow-stone-200/50 transition-all duration-700 hover:-translate-y-2 animate-fade-in-up">
-                  <div className="aspect-square bg-stone-50 relative overflow-hidden flex items-center justify-center p-8 group-hover:bg-cream-50 transition-colors">
-                    {product.image ? (
-                      <img src={product.image} alt={product.name} className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-700" />
-                    ) : (
-                      <div className="text-5xl opacity-[0.05] grayscale group-hover:opacity-[0.15] transition-opacity">🍽️</div>
-                    )}
-                    <div className="absolute top-4 right-4 px-3 py-1 bg-white/90 backdrop-blur-md rounded-full text-[9px] font-black text-cafe-600 uppercase tracking-widest shadow-sm border border-stone-50">
-                      {product.category?.name || 'Standard'}
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 xl:gap-6">
+                {filteredProducts.map((product) => (
+                  <button
+                    key={product._id}
+                    onClick={() => handleAddProduct(product)}
+                    className="group bg-white rounded-2xl flex flex-col overflow-hidden border border-stone-100 shadow-sm hover:shadow-card hover:-translate-y-1 transition-all duration-300 text-left active:scale-[0.98]"
+                  >
+                    <div className="aspect-[4/3] bg-stone-50 relative overflow-hidden flex flex-col items-center justify-center p-6 border-b border-stone-50">
+                      {(product.image || getProductFallbackImage(product.name)) ? (
+                        <img src={product.image || getProductFallbackImage(product.name)} alt={product.name} className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                      ) : (
+                        <div className="relative w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-stone-300 z-10">
+                          <ShoppingBag className="w-5 h-5 opacity-50" />
+                        </div>
+                      )}
+                      <div className="absolute top-3 right-3 px-2 py-0.5 bg-white/90 backdrop-blur rounded-md text-[10px] font-bold text-cafe-600 shadow-sm border border-stone-100">
+                        {product.category?.name || 'Item'}
+                      </div>
                     </div>
-                  </div>
-                  <div className="p-7">
-                    <div className="flex justify-between items-start gap-3 mb-2">
-                      <h4 className="font-display font-black text-stone-900 group-hover:text-cafe-600 transition-colors leading-tight min-h-[2.5rem]">
+                    <div className="p-4 flex-1 flex flex-col">
+                      <h4 className="font-display font-bold text-stone-800 text-sm leading-tight mb-1 group-hover:text-cafe-600 transition-colors">
                         {product.name}
                       </h4>
-                    </div>
-                    <p className="text-stone-400 text-[10px] font-medium leading-relaxed line-clamp-2 h-8 mb-4">
-                      {product.description || 'Experience the essence of our handcrafted culinary excellence.'}
-                    </p>
-                    <div className="flex items-center justify-between pt-5 border-t border-stone-50">
-                      <span className="text-lg font-black text-stone-900 tracking-tight">
-                        {formatCurrency(product.salePrice)}
-                      </span>
-                      <div className="flex items-center gap-1.5 group/info">
-                        <div className="w-7 h-7 rounded-lg bg-stone-50 border border-stone-100 flex items-center justify-center text-stone-300 group-hover/info:bg-cafe-50 group-hover/info:border-cafe-100 group-hover/info:text-cafe-500 transition-all">
-                          <Info className="w-3.5 h-3.5" />
+                      <div className="mt-auto pt-3 flex items-center justify-between">
+                        <span className="text-sm font-black text-stone-900">
+                          {formatCurrency(product.salePrice)}
+                        </span>
+                        <div className="w-7 h-7 rounded-full bg-cafe-50 shadow-sm flex items-center justify-center group-hover:bg-cafe-500 text-cafe-600 group-hover:text-white transition-colors">
+                          <Plus className="w-4 h-4" />
                         </div>
                       </div>
                     </div>
-                  </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </main>
+
+        {/* Right Side: Order Summary Panel (Desktop) */}
+        <aside className="hidden lg:flex flex-col w-[380px] bg-white border-l border-stone-100 shadow-[inset_1px_0_0_0_rgba(0,0,0,0.02)] z-20">
+          <div className="px-6 py-5 border-b border-stone-100 flex items-center justify-between bg-stone-50/50">
+            <h3 className="font-display font-black text-stone-900">Current Order</h3>
+            <span className="px-2.5 py-1 bg-stone-200 text-stone-700 text-xs font-bold rounded-lg">{totalItems} Items</span>
+          </div>
+
+          <div className="flex-1 overflow-y-auto p-6 space-y-4 scrollbar-none bg-white">
+            {orderLines.length === 0 ? (
+              <div className="h-full flex flex-col items-center justify-center text-center text-stone-400 space-y-3 opacity-60">
+                <div className="w-16 h-16 rounded-full bg-stone-50 flex items-center justify-center">
+                  <ShoppingBag className="w-6 h-6" />
                 </div>
-              ))}
-            </div>
-          ) : (
-            <div className="space-y-4 animate-fade-in">
-              {filteredProducts.map((product) => (
-                <div key={product._id} className="group bg-white rounded-2xl p-4 flex items-center gap-6 border border-stone-100 shadow-sm hover:shadow-md transition-all">
-                  <div className="w-16 h-16 bg-stone-50 rounded-xl flex items-center justify-center border border-stone-100 overflow-hidden shadow-inner">
-                    {product.image ? (
-                      <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
-                    ) : (
-                      <span className="text-xl opacity-20 italic">🍽️</span>
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-1">
-                      <h4 className="font-display font-black text-stone-900 group-hover:text-cafe-600 transition-colors">{product.name}</h4>
-                      <span className="px-2 py-0.5 bg-stone-100 rounded text-[8px] font-black text-stone-400 uppercase tracking-widest">{product.category?.name}</span>
+                <p className="text-sm font-medium">No items added yet</p>
+              </div>
+            ) : (
+              orderLines.map((line, i) => (
+                <div key={i} className="bg-stone-50 rounded-2xl p-4 border border-stone-100 group animate-fade-in-up transition-all hover:bg-stone-100/50">
+                  <div className="flex items-start justify-between gap-3 mb-3">
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-display font-bold text-stone-800 text-sm truncate">{line.product.name}</h4>
+                      <p className="text-xs font-semibold text-cafe-600 mt-0.5">{formatCurrency(line.unitPrice)}</p>
                     </div>
-                    <p className="text-stone-400 text-[10px] line-clamp-1">{product.description || 'Our signature high-quality creation.'}</p>
+                    <p className="font-black text-stone-900">{formatCurrency(line.subtotal)}</p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-lg font-black text-stone-900 tracking-tight">{formatCurrency(product.salePrice)}</p>
-                    <p className="text-[9px] font-black text-emerald-600 uppercase tracking-widest mt-1">Ready for Order</p>
+                  
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center bg-white rounded-lg shadow-sm border border-stone-200 p-0.5">
+                      <button onClick={() => handleUpdateQuantity(i, -1)} className="p-1.5 text-stone-500 hover:text-cafe-600 hover:bg-cafe-50 rounded-md transition-colors active:scale-95">
+                        {line.quantity === 1 ? <Trash2 className="w-3.5 h-3.5 text-red-400" /> : <Minus className="w-3.5 h-3.5" />}
+                      </button>
+                      <span className="w-8 text-center text-xs font-bold text-stone-800">{line.quantity}</span>
+                      <button onClick={() => handleUpdateQuantity(i, 1)} className="p-1.5 text-stone-500 hover:text-cafe-600 hover:bg-cafe-50 rounded-md transition-colors active:scale-95">
+                        <Plus className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+
+                    <div className="relative flex items-center">
+                      <input 
+                        type="text"
+                        placeholder="Add note..."
+                        value={line.notes}
+                        onChange={(e) => handleUpdateNotes(i, e.target.value)}
+                        className="w-32 bg-transparent text-[11px] font-medium text-stone-600 placeholder-stone-400 border-b border-transparent focus:border-stone-300 px-1 py-1 outline-none transition-all"
+                      />
+                      <MessageSquare className="w-3 h-3 text-stone-300 absolute right-1 pointer-events-none" />
+                    </div>
                   </div>
-                  <ChevronRight className="w-5 h-5 text-stone-200 ml-4 group-hover:text-cafe-500 group-hover:translate-x-1 transition-all" />
                 </div>
-              ))}
+              ))
+            )}
+          </div>
+
+          <div className="p-6 bg-stone-50 border-t border-stone-100">
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-sm font-semibold text-stone-500">Subtotal</span>
+              <span className="text-lg font-black text-stone-900">{formatCurrency(orderTotal)}</span>
             </div>
-          )
+            {/* Payment is strictly restricted, showing Send Order only */}
+            <button
+              onClick={handleSendOrder}
+              disabled={isSubmitting || orderLines.length === 0}
+              className="w-full py-4 px-6 bg-gradient-to-r from-cafe-500 to-cafe-600 text-white font-display font-bold rounded-xl shadow-btn hover:shadow-btn-hover transition-all hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0 flex items-center justify-center gap-2"
+            >
+              <Send className="w-4 h-4" />
+              {isSubmitting ? 'Sending...' : 'Send Order to Kitchen'}
+            </button>
+          </div>
+        </aside>
+
+        {/* Mobile Sticky Order Bar */}
+        <div className="lg:hidden absolute bottom-0 left-0 right-0 z-40 bg-white border-t border-stone-200 shadow-glass-lg p-4 pb-safe flex items-center justify-between px-6">
+          <button 
+            onClick={() => setShowMobileCart(true)}
+            className="flex items-center gap-3 relative"
+          >
+            <div className="w-12 h-12 bg-cafe-50 rounded-xl flex items-center justify-center text-cafe-600 border border-cafe-100">
+              <ShoppingBag className="w-5 h-5" />
+            </div>
+            {totalItems > 0 && (
+              <span className="absolute -top-2 -right-2 w-5 h-5 bg-stone-900 text-white text-[10px] font-bold flex items-center justify-center rounded-full shadow-md">
+                 {totalItems}
+              </span>
+            )}
+            <div className="text-left">
+               <p className="text-xs font-bold tracking-widest text-stone-400 uppercase">Total</p>
+               <p className="text-[17px] font-display font-black text-stone-900 leading-none">{formatCurrency(orderTotal)}</p>
+            </div>
+          </button>
+
+          <button
+            onClick={() => {
+              if(orderLines.length > 0) setShowMobileCart(true);
+            }}
+            disabled={orderLines.length === 0}
+            className="py-3.5 px-6 bg-cafe-600 text-white rounded-xl font-bold font-display shadow-btn disabled:opacity-50"
+          >
+            View Order
+          </button>
+        </div>
+
+        {/* Mobile Cart Drawer/Modal (Simplified view) */}
+        {showMobileCart && (
+          <div className="lg:hidden fixed inset-0 z-50 bg-stone-900/40 backdrop-blur-sm flex flex-col justify-end animate-fade-in transition-opacity" onClick={() => setShowMobileCart(false)}>
+            <div className="bg-white max-h-[85vh] rounded-t-3xl shadow-2xl flex flex-col w-full animate-slide-up" onClick={e => e.stopPropagation()}>
+              <div className="px-6 py-5 border-b border-stone-100 flex items-center justify-between bg-stone-50/50 rounded-t-3xl">
+                <h3 className="font-display font-black text-stone-900">Current Order</h3>
+                <button onClick={() => setShowMobileCart(false)} className="text-stone-400 font-bold px-3 py-1 bg-white rounded-md text-xs shadow-sm">
+                  Close
+                </button>
+              </div>
+              <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                  {orderLines.map((line, i) => (
+                    <div key={i} className="bg-white rounded-2xl p-4 border border-stone-200">
+                      <div className="flex justify-between items-start mb-2">
+                        <span className="font-bold text-stone-800 text-sm">{line.product.name}</span>
+                        <span className="font-black text-stone-900 text-sm">{formatCurrency(line.subtotal)}</span>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center border border-stone-200 rounded-lg p-0.5">
+                          <button onClick={() => handleUpdateQuantity(i, -1)} className="p-2"><Minus className="w-3 h-3 text-stone-500" /></button>
+                          <span className="w-6 text-center text-xs font-bold text-stone-800">{line.quantity}</span>
+                          <button onClick={() => handleUpdateQuantity(i, 1)} className="p-2"><Plus className="w-3 h-3 text-stone-500" /></button>
+                        </div>
+                        <input 
+                          type="text" placeholder="Note..." value={line.notes}
+                          onChange={(e) => handleUpdateNotes(i, e.target.value)}
+                          className="flex-1 border border-stone-200 rounded-lg px-3 py-1 text-xs text-stone-600 focus:border-cafe-500 outline-none"
+                        />
+                        <button onClick={() => handleUpdateQuantity(i, -line.quantity)} className="p-2 text-red-500 hover:bg-red-50 rounded-lg">
+                           <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+               </div>
+               <div className="p-6 bg-white border-t border-stone-100 shadow-[0_-4px_15px_rgba(0,0,0,0.02)]">
+                  <button
+                    onClick={() => { handleSendOrder(); setShowMobileCart(false); }}
+                    className="w-full py-4 rounded-xl bg-cafe-600 text-white font-display font-bold shadow-btn flex items-center justify-center gap-2"
+                  >
+                    <Send className="w-4 h-4" />
+                    Send Order to Kitchen • {formatCurrency(orderTotal)}
+                  </button>
+               </div>
+            </div>
+          </div>
         )}
-      </main>
+      </div>
     </div>
   );
 }
