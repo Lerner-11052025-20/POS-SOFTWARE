@@ -98,4 +98,21 @@ export const categoriesAPI = {
   remove: (id) => api.delete(`/categories/${id}`),
 };
 
+// Floors API calls
+export const floorsAPI = {
+  getAll: (params) => api.get('/floors', { params }),
+  create: (data) => api.post('/floors', data),
+  update: (id, data) => api.put(`/floors/${id}`, data),
+  remove: (id) => api.delete(`/floors/${id}`),
+};
+
+// Tables API calls
+export const tablesAPI = {
+  getAll: (params) => api.get('/tables', { params }),
+  create: (data) => api.post('/tables', data),
+  update: (id, data) => api.put(`/tables/${id}`, data),
+  bulkDuplicate: (ids) => api.post('/tables/bulk/duplicate', { ids }),
+  bulkDelete: (ids) => api.delete('/tables/bulk', { data: { ids } }),
+};
+
 export default api;

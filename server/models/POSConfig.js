@@ -36,6 +36,10 @@ const posConfigSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    isFloorPlanEnabled: {
+      type: Boolean,
+      default: false,
+    },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',

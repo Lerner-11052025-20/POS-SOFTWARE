@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard';
 import POSConfigurationPage from './pages/pos/POSConfigurationPage';
 import OperationsManagementPage from './pages/pos/OperationsManagementPage';
 import ProductCategoryManagementPage from './pages/pos/ProductCategoryManagementPage';
+import FloorManagementPage from './pages/pos/FloorManagementPage';
 import UnauthorizedPage from './pages/UnauthorizedPage';
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -89,12 +90,12 @@ export default function App() {
         }
       />
 
-      {/* POS Floor / Orders placeholder */}
+      {/* POS Floor Selection */}
       <Route
         path="/pos/floor"
         element={
           <ProtectedRoute allowedRoles={['cashier', 'manager']}>
-            <Dashboard />
+            <FloorManagementPage />
           </ProtectedRoute>
         }
       />
