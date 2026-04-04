@@ -9,19 +9,39 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-const getProductFallbackImage = (name) => {
+const getProductFallbackImage = (name, categoryName = '') => {
   if (!name) return null;
   const n = name.toLowerCase();
-  if (n.includes('water')) return 'https://images.unsplash.com/photo-1530711654140-23ef9ad45094?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fHdhdGVyJTIwYm90dGxlfGVufDB8fDB8fHww';
-  if (n.includes('sprite') || n.includes('cola') || n.includes('soda')) return 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&q=80&w=400';
-  if (n.includes('tea')) return 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&q=80&w=400';
+  const c = categoryName.toLowerCase();
+
+  // Specific Beverages
+  if (n.includes('water')) return 'https://images.unsplash.com/photo-1523362628745-0c100150b504?auto=format&fit=crop&q=80&w=400';
+  if (n.includes('sprite') || n.includes('lime') || n.includes('dew')) return 'https://images.unsplash.com/photo-1625772452859-1e03c58c1ebb?auto=format&fit=crop&q=80&w=400';
+  if (n.includes('cola') || n.includes('thumbs up') || n.includes('pepsi') || n.includes('soda')) return 'https://images.unsplash.com/photo-1554866585-cd94860890b7?auto=format&fit=crop&q=80&w=400';
+  if (n.includes('maza') || n.includes('maaza') || n.includes('mango') || n.includes('juice') || n.includes('slush')) return 'https://images.unsplash.com/photo-1622597467836-f30896062f6b?auto=format&fit=crop&q=80&w=400';
+  if (n.includes('tea') || n.includes('chai')) return 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&q=80&w=400';
   if (n.includes('coffee') || n.includes('espresso') || n.includes('latte') || n.includes('mocha')) return 'https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&q=80&w=400';
+  if (n.includes('drink') || n.includes('beverage')) return 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&q=80&w=400';
+
+  // Indian Cuisine
+  if (n.includes('paneer') || n.includes('masala') || n.includes('curry')) return 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&q=80&w=400';
+  if (n.includes('thali') || n.includes('punjabi') || n.includes('meal')) return 'https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?auto=format&fit=crop&q=80&w=400';
+  if (n.includes('platter')) return 'https://images.unsplash.com/photo-1541529086526-db283c563270?auto=format&fit=crop&q=80&w=400';
+  
+  // Quick Bites & Global
   if (n.includes('burger')) return 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&q=80&w=400';
   if (n.includes('pizza')) return 'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&q=80&w=400';
-  if (n.includes('sandwitch') || n.includes('sandwich')) return 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&q=80&w=400';
+  if (n.includes('sandwich') || n.includes('sandwitch')) return 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&q=80&w=400';
+  
+  // Healthy & Desserts
+  if (n.includes('fruit') || n.includes('salad')) return 'https://images.unsplash.com/photo-1519996529931-28324d5a630e?auto=format&fit=crop&q=80&w=400';
   if (n.includes('cake') || n.includes('dessert') || n.includes('sweet')) return 'https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&q=80&w=400';
   
-  // Generic cafe food/drink fallback if no match
+  // Intelligent Fallbacks based on category
+  if (c.includes('beverage') || c.includes('drink')) return 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&q=80&w=400';
+  if (c.includes('food') || c.includes('meal')) return 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=400';
+  
+  // Generic cafe fallback
   return 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&q=80&w=400';
 };
 
@@ -262,8 +282,8 @@ export default function CustomerMenuPage() {
                     className="group bg-white rounded-2xl flex flex-col overflow-hidden border border-stone-100 shadow-sm hover:shadow-card hover:-translate-y-1 transition-all duration-300 text-left active:scale-[0.98]"
                   >
                     <div className="aspect-[4/3] bg-stone-50 relative overflow-hidden flex flex-col items-center justify-center p-6 border-b border-stone-50">
-                      {(product.image || getProductFallbackImage(product.name)) ? (
-                        <img src={product.image || getProductFallbackImage(product.name)} alt={product.name} className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                      {(product.image || getProductFallbackImage(product.name, product.category?.name)) ? (
+                        <img src={product.image || getProductFallbackImage(product.name, product.category?.name)} alt={product.name} className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                       ) : (
                         <div className="relative w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-stone-300 z-10">
                           <ShoppingBag className="w-5 h-5 opacity-50" />
