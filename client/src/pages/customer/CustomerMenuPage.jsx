@@ -8,6 +8,7 @@ import {
   Plus, Minus, MessageSquare, Trash2, Send, ShoppingBag, ArrowLeft
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import PaymentCheckoutModal from '../../components/payment/PaymentCheckoutModal';
 
 const getProductFallbackImage = (name, categoryName = '') => {
   if (!name) return null;
@@ -59,6 +60,7 @@ export default function CustomerMenuPage() {
   const [orderLines, setOrderLines] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showMobileCart, setShowMobileCart] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   useEffect(() => {
     if (!table) {
@@ -148,31 +150,27 @@ export default function CustomerMenuPage() {
 
   const handleSendOrder = async () => {
     if (orderLines.length === 0) return;
-    setIsSubmitting(true);
-    try {
-      const payload = {
-        table: table._id,
-        floor: floor?._id,
-        lines: orderLines.map(l => ({
-          product: l.product.name,
-          quantity: l.quantity,
-          unitPrice: l.unitPrice,
-          subtotal: l.subtotal,
-          notes: l.notes,
-        })),
-      };
-      const res = await ordersAPI.create(payload);
-      if (res.data.success) {
-        toast.success(`Order placed for Table ${table.tableNumber}`);
-        setOrderLines([]);
-        setShowMobileCart(false);
-      }
-    } catch (err) {
-      toast.error('Failed to submit order');
-      console.error(err);
-    } finally {
-      setIsSubmitting(false);
-    }
+    setShowPaymentModal(true);
+  };
+  
+  const getOrderPayload = () => {
+    return {
+      table: table._id,
+      floor: floor?._id,
+      lines: orderLines.map(l => ({
+        product: l.product.name,
+        quantity: l.quantity,
+        unitPrice: l.unitPrice,
+        subtotal: l.subtotal,
+        notes: l.notes,
+      })),
+    };
+  };
+
+  const handlePaymentSuccess = () => {
+    setOrderLines([]);
+    setShowMobileCart(false);
+    setShowPaymentModal(false);
   };
 
   const orderTotal = orderLines.reduce((sum, line) => sum + line.subtotal, 0);
@@ -462,6 +460,14 @@ export default function CustomerMenuPage() {
           </div>
         )}
       </div>
+      
+      <PaymentCheckoutModal 
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        orderTotal={orderTotal}
+        orderPayload={orderLines.length > 0 ? getOrderPayload() : null}
+        onSuccess={handlePaymentSuccess}
+      />
     </div>
   );
 }
