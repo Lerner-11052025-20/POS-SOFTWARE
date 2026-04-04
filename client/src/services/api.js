@@ -43,4 +43,17 @@ export const authAPI = {
   checkEmail: (email) => api.get(`/auth/check-email/${email}`),
 };
 
+// POS Configuration API calls
+export const posAPI = {
+  getConfigs: () => api.get('/pos/configs'),
+  getConfig: (id) => api.get(`/pos/configs/${id}`),
+  createConfig: (data) => api.post('/pos/configs', data),
+  updateConfig: (id, data) => api.put(`/pos/configs/${id}`, data),
+  deleteConfig: (id) => api.delete(`/pos/configs/${id}`),
+  updatePaymentMethods: (id, data) => api.put(`/pos/configs/${id}/payment-methods`, data),
+  openSession: (id, data) => api.post(`/pos/configs/${id}/open-session`, data),
+  closeSession: (id, data) => api.post(`/pos/configs/${id}/close-session`, data),
+  getSessions: (id) => api.get(`/pos/configs/${id}/sessions`),
+};
+
 export default api;

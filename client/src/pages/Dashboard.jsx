@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { LogOut, Coffee, LayoutGrid, ChefHat, ShoppingBag, BarChart3, Settings } from 'lucide-react';
+import { LogOut, Coffee, Monitor, LayoutGrid, ChefHat, ShoppingBag, BarChart3, Settings } from 'lucide-react';
 
 const ROLE_FEATURES = {
   cashier: {
@@ -8,28 +8,44 @@ const ROLE_FEATURES = {
     description: 'Your station is ready. Start taking orders, manage tables, and process payments.',
     icon: LayoutGrid,
     color: 'from-cafe-500 to-amber-500',
-    quickActions: ['Open Register', 'View Floor Plan', 'New Order'],
+    quickActions: [
+      { label: 'POS Config', path: '/pos/config', icon: Monitor, ready: true },
+      { label: 'View Floor Plan', path: '/pos/floor', icon: LayoutGrid, ready: false },
+      { label: 'New Order', path: '/pos/orders', icon: ShoppingBag, ready: false },
+    ],
   },
   kitchen: {
     title: 'Kitchen Display',
     description: 'Kitchen queue is live. Track incoming orders and update preparation status.',
     icon: ChefHat,
     color: 'from-amber-500 to-orange-500',
-    quickActions: ['View Queue', 'Active Orders', 'Completed'],
+    quickActions: [
+      { label: 'View Queue', path: '/kitchen', icon: ChefHat, ready: false },
+      { label: 'Active Orders', path: '/kitchen', icon: ShoppingBag, ready: false },
+      { label: 'Completed', path: '/kitchen', icon: Settings, ready: false },
+    ],
   },
   customer: {
     title: 'Customer Portal',
     description: 'Welcome! Browse menu, place orders, and track your order status in real time.',
     icon: ShoppingBag,
     color: 'from-emerald-500 to-teal-500',
-    quickActions: ['View Menu', 'My Orders', 'Self Order'],
+    quickActions: [
+      { label: 'View Menu', path: '/customer', icon: ShoppingBag, ready: false },
+      { label: 'My Orders', path: '/customer', icon: LayoutGrid, ready: false },
+      { label: 'Self Order', path: '/customer', icon: Monitor, ready: false },
+    ],
   },
   manager: {
     title: 'Management Hub',
     description: 'Full control of operations. Monitor performance, configure settings, and manage staff.',
     icon: BarChart3,
     color: 'from-violet-500 to-purple-500',
-    quickActions: ['Dashboard', 'Reports', 'Settings'],
+    quickActions: [
+      { label: 'POS Config', path: '/pos/config', icon: Monitor, ready: true },
+      { label: 'Reports', path: '/pos/reporting', icon: BarChart3, ready: false },
+      { label: 'Settings', path: '/pos/config', icon: Settings, ready: true },
+    ],
   },
 };
 
@@ -107,18 +123,22 @@ export default function Dashboard() {
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8 animate-fade-in-up" style={{ animationDelay: '200ms', animationFillMode: 'backwards' }}>
-          {roleData.quickActions.map((action, i) => (
-            <button
-              key={action}
-              className="p-5 bg-white rounded-2xl shadow-card hover:shadow-card-hover border border-stone-100 text-left transition-all duration-300 hover:-translate-y-0.5 group"
-            >
-              <div className="w-10 h-10 rounded-xl bg-stone-100 group-hover:bg-cafe-50 flex items-center justify-center mb-3 transition-colors">
-                <Settings className="w-5 h-5 text-stone-500 group-hover:text-cafe-500 transition-colors" />
-              </div>
-              <h3 className="font-display font-semibold text-stone-800 text-sm">{action}</h3>
-              <p className="text-stone-400 text-xs mt-1">Coming soon →</p>
-            </button>
-          ))}
+          {roleData.quickActions.map((action, i) => {
+            const ActionIcon = action.icon;
+            return (
+              <button
+                key={action.label}
+                onClick={() => action.ready && navigate(action.path)}
+                className={`p-5 bg-white rounded-2xl shadow-card hover:shadow-card-hover border border-stone-100 text-left transition-all duration-300 hover:-translate-y-0.5 group ${!action.ready ? 'opacity-80' : ''}`}
+              >
+                <div className="w-10 h-10 rounded-xl bg-stone-100 group-hover:bg-cafe-50 flex items-center justify-center mb-3 transition-colors">
+                  <ActionIcon className="w-5 h-5 text-stone-500 group-hover:text-cafe-500 transition-colors" />
+                </div>
+                <h3 className="font-display font-semibold text-stone-800 text-sm">{action.label}</h3>
+                <p className="text-stone-400 text-xs mt-1">{action.ready ? 'Go to module →' : 'Coming soon →'}</p>
+              </button>
+            );
+          })}
         </div>
 
         {/* User Info Card */}

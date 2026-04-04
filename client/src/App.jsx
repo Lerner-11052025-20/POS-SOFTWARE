@@ -2,6 +2,8 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import AuthPage from './pages/auth/AuthPage';
 import Dashboard from './pages/Dashboard';
+import POSConfigurationPage from './pages/pos/POSConfigurationPage';
+import UnauthorizedPage from './pages/UnauthorizedPage';
 import ProtectedRoute from './components/ProtectedRoute';
 
 export default function App() {
@@ -47,7 +49,33 @@ export default function App() {
         }
       />
 
-      {/* Placeholder routes for role-specific pages */}
+      {/* POS Configuration — Manager + Cashier */}
+      <Route
+        path="/pos/config"
+        element={
+          <ProtectedRoute allowedRoles={['manager', 'cashier']}>
+            <POSConfigurationPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/pos/config/:id/settings"
+        element={
+          <ProtectedRoute allowedRoles={['manager']}>
+            <POSConfigurationPage />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* POS Floor / Orders placeholder */}
+      <Route
+        path="/pos/floor"
+        element={
+          <ProtectedRoute allowedRoles={['cashier', 'manager']}>
+            <Dashboard />
+          </ProtectedRoute>
+        }
+      />
       <Route
         path="/pos/*"
         element={
@@ -56,6 +84,8 @@ export default function App() {
           </ProtectedRoute>
         }
       />
+
+      {/* Kitchen */}
       <Route
         path="/kitchen"
         element={
@@ -64,11 +94,23 @@ export default function App() {
           </ProtectedRoute>
         }
       />
+
+      {/* Customer */}
       <Route
         path="/customer/*"
         element={
           <ProtectedRoute allowedRoles={['customer']}>
             <Dashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Unauthorized */}
+      <Route
+        path="/unauthorized"
+        element={
+          <ProtectedRoute>
+            <UnauthorizedPage />
           </ProtectedRoute>
         }
       />
