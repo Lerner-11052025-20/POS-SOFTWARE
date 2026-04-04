@@ -6,7 +6,7 @@ import POSConfigurationPage from './pages/pos/POSConfigurationPage';
 import OperationsManagementPage from './pages/pos/OperationsManagementPage';
 import ProductCategoryManagementPage from './pages/pos/ProductCategoryManagementPage';
 import FloorManagementPage from './pages/pos/FloorManagementPage';
-import POSTerminalFloorViewPage from './pages/pos/POSTerminalFloorViewPage';
+
 import CustomerMenuPage from './pages/customer/CustomerMenuPage';
 import UnauthorizedPage from './pages/UnauthorizedPage';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -104,14 +104,7 @@ export default function App() {
         }
       />
 
-      <Route
-        path="/pos/terminal/:configId"
-        element={
-          <ProtectedRoute allowedRoles={['cashier', 'manager', 'customer']}>
-            <POSTerminalFloorViewPage />
-          </ProtectedRoute>
-        }
-      />
+
 
       <Route
         path="/kitchen"
@@ -126,7 +119,7 @@ export default function App() {
         path="/customer"
         element={
           <ProtectedRoute allowedRoles={['customer', 'cashier', 'manager']}>
-            <POSTerminalFloorViewPage />
+            <Dashboard />
           </ProtectedRoute>
         }
       />

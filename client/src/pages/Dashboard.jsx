@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { posAPI } from '../services/api';
-import { LogOut, Coffee, Monitor, LayoutGrid, ChefHat, ShoppingBag, BarChart3, Settings, ClipboardList, Terminal, ArrowRight, Table } from 'lucide-react';
+import { LogOut, Coffee, Monitor, LayoutGrid, ChefHat, ShoppingBag, BarChart3, Settings, ClipboardList, ArrowRight } from 'lucide-react';
 
 const ROLE_FEATURES = {
   cashier: {
@@ -33,7 +33,6 @@ const ROLE_FEATURES = {
     color: 'from-emerald-500 to-teal-500',
     quickActions: [
       { label: 'View Menu', path: '/customer/menu', icon: ShoppingBag, ready: true },
-      { label: 'Self Order', path: '/pos/terminal', icon: Monitor, ready: true },
       { label: 'My Orders', path: '/customer', icon: LayoutGrid, ready: false },
     ],
   },
@@ -82,13 +81,7 @@ export default function Dashboard() {
     navigate('/login', { replace: true });
   };
 
-  const handleSelfOrder = () => {
-    if (configs.length > 0) {
-      navigate(`/pos/terminal/${configs[0]._id}`);
-    } else {
-      navigate('/pos/terminal/default');
-    }
-  };
+
 
   return (
     <div className="min-h-screen bg-cream-50">
@@ -123,36 +116,7 @@ export default function Dashboard() {
       </header>
 
       <main className="max-w-6xl mx-auto px-6 py-12">
-        {/* Step 1: POS Session Entry Card (for Customers/Staff) */}
-        {user.role === 'customer' && !loadingConfigs && configs.length > 0 && (
-          <div className="bg-white rounded-[2.5rem] p-6 sm:p-8 border border-stone-100 shadow-xl shadow-stone-200/20 mb-10 animate-fade-in-up">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-8">
-              <div className="flex items-center gap-6">
-                <div className="w-16 h-16 bg-stone-900 rounded-[1.5rem] flex items-center justify-center text-cafe-500 shadow-2xl transform rotate-3">
-                  <Terminal className="w-8 h-8" />
-                </div>
-                <div className="flex flex-col">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-lg text-[9px] font-black uppercase tracking-widest">Active Station</span>
-                    <span className="text-stone-300 text-[10px] font-bold">Terminal ID: ODOO-001</span>
-                  </div>
-                  <h3 className="text-2xl font-display font-black text-stone-900 tracking-tight leading-none mb-1">
-                    {configs[0].name}
-                  </h3>
-                  <p className="text-stone-400 text-xs font-semibold tracking-widest uppercase">Start your dine-in experience today.</p>
-                </div>
-              </div>
 
-              <button
-                onClick={handleSelfOrder}
-                className="bg-cafe-600 hover:bg-cafe-500 text-white px-8 py-5 rounded-3xl text-sm font-black uppercase tracking-widest flex items-center gap-3 transition-all hover:shadow-gold hover:shadow-cafe-500/30 group active:scale-95 whitespace-nowrap"
-              >
-                Choose Your Table
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </button>
-            </div>
-          </div>
-        )}
 
         <div className={`relative overflow-hidden rounded-3xl bg-gradient-to-br ${roleData.color} p-8 sm:p-12 text-white mb-8 animate-fade-in-up`}>
           <div className="relative z-10">
@@ -182,10 +146,9 @@ export default function Dashboard() {
               <button
                 key={action.label}
                 onClick={() => {
-                  if (action.ready) {
-                    if (action.label === 'Self Order') handleSelfOrder();
-                    else navigate(action.path);
-                  }
+                if (action.ready) {
+                    navigate(action.path);
+                }
                 }}
                 className={`p-5 bg-white rounded-2xl shadow-card hover:shadow-card-hover border border-stone-100 text-left transition-all duration-300 hover:-translate-y-0.5 group ${!action.ready ? 'opacity-80' : ''}`}
               >
