@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { posAPI } from '../services/api';
-import { LogOut, Coffee, Monitor, LayoutGrid, ChefHat, ShoppingBag, BarChart3, Settings, ClipboardList, ArrowRight } from 'lucide-react';
+import { LogOut, Coffee, Monitor, LayoutGrid, ChefHat, ShoppingBag, BarChart3, Settings, ClipboardList, ArrowRight, Terminal } from 'lucide-react';
 
 const ROLE_FEATURES = {
   cashier: {
@@ -33,6 +33,7 @@ const ROLE_FEATURES = {
     color: 'from-emerald-500 to-teal-500',
     quickActions: [
       { label: 'View Menu', path: '/customer/menu', icon: ShoppingBag, ready: true },
+      { label: 'Select Table', path: '/pos/terminal', icon: Monitor, ready: true },
       { label: 'My Orders', path: '/customer', icon: LayoutGrid, ready: false },
     ],
   },
@@ -81,6 +82,13 @@ export default function Dashboard() {
     navigate('/login', { replace: true });
   };
 
+  const handleSelfOrder = () => {
+    if (configs.length > 0) {
+      navigate(`/pos/terminal/${configs[0]._id}`);
+    } else {
+      navigate('/pos/terminal/default');
+    }
+  };
 
 
   return (
@@ -146,9 +154,10 @@ export default function Dashboard() {
               <button
                 key={action.label}
                 onClick={() => {
-                if (action.ready) {
-                    navigate(action.path);
-                }
+                  if (action.ready) {
+                    if (action.label === 'Select Table') handleSelfOrder();
+                    else navigate(action.path);
+                  }
                 }}
                 className={`p-5 bg-white rounded-2xl shadow-card hover:shadow-card-hover border border-stone-100 text-left transition-all duration-300 hover:-translate-y-0.5 group ${!action.ready ? 'opacity-80' : ''}`}
               >

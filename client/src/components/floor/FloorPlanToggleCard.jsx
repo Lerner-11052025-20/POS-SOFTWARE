@@ -14,14 +14,14 @@ export default function FloorPlanToggleCard({ configs, selectedConfig, onConfigC
             <span className="text-xl">☕</span>
           </div>
           <div className="flex-1">
-            <h3 className="font-display font-black text-stone-900 tracking-tight text-sm uppercase">POS Terminal Control</h3>
-            <p className="text-[10px] text-stone-400 font-bold tracking-widest uppercase mt-0.5">Configuration Active</p>
+            <h3 className="font-display font-bold text-stone-900 text-sm">POS Terminal Control</h3>
+            <p className="text-[10px] text-stone-400 font-medium mt-0.5">Configuration Active</p>
           </div>
         </div>
 
         <div className="space-y-4">
           <div className="flex flex-col">
-            <label className="text-[10px] font-black text-stone-400 uppercase tracking-widest mb-1.5 ml-0.5">Active POS Workspace</label>
+            <label className="text-[10px] font-semibold text-stone-400 uppercase tracking-wider mb-1.5 ml-0.5">Active POS Workspace</label>
             <div className="relative group/select">
               <select 
                 value={selectedConfig._id}
@@ -46,7 +46,7 @@ export default function FloorPlanToggleCard({ configs, selectedConfig, onConfigC
             : 'bg-stone-50 border-stone-200 opacity-80'
           }`}>
             <div className="flex flex-col gap-0.5">
-              <p className={`text-xs font-black uppercase tracking-widest transition-colors ${
+              <p className={`text-xs font-semibold uppercase tracking-wider transition-colors ${
                 selectedConfig.isFloorPlanEnabled ? 'text-emerald-700' : 'text-stone-500'
               }`}>Floor Plan Profile</p>
               <p className="text-[10px] text-stone-400 max-w-[120px] font-medium leading-tight">Enable table management for this POS.</p>

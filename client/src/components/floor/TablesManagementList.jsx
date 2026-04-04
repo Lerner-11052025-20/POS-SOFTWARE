@@ -70,10 +70,10 @@ export default function TablesManagementList({ floor, tables, onRefresh, isManag
                🪑
              </div>
              <div>
-               <h2 className="text-xl font-display font-black text-stone-900 leading-tight">
-                 {floor.name} <span className="text-stone-400 font-bold tracking-widest text-[10px] ml-1 uppercase">Seating Intelligence</span>
+               <h2 className="text-xl font-display font-bold text-stone-900 leading-tight">
+                 {floor.name} <span className="text-stone-400 font-medium text-xs ml-1">Seating Intelligence</span>
                </h2>
-               <p className="text-stone-400 text-xs font-semibold uppercase tracking-widest mt-1">
+               <p className="text-stone-500 text-xs mt-1">
                  Total Tables: {tables.length} • Total Capacity: {tables.reduce((acc, t) => acc + t.seatsCount, 0)} Seats
                </p>
              </div>
@@ -81,14 +81,14 @@ export default function TablesManagementList({ floor, tables, onRefresh, isManag
           <div className="flex items-center gap-3">
              {isManager && (
                <>
-                 <button onClick={onEditFloor} className="px-4 py-2.5 text-xs text-stone-500 font-black tracking-widest uppercase hover:bg-stone-50 rounded-xl transition-all">
+                 <button onClick={onEditFloor} className="px-4 py-2.5 text-xs font-semibold text-stone-600 hover:bg-stone-50 rounded-xl transition-all">
                    Manage Floor Settings
                  </button>
                  <button 
                    onClick={() => setIsAdding(true)}
-                   className="px-6 py-3 bg-cafe-600 text-white text-xs font-black uppercase tracking-widest rounded-xl shadow-gold hover:bg-cafe-700 hover:scale-[1.02] active:scale-95 transition-all"
+                   className="px-6 py-3 bg-cafe-600 text-white text-xs font-semibold rounded-xl shadow-gold hover:bg-cafe-700 hover:scale-[1.02] active:scale-95 transition-all"
                  >
-                   + ADD NEW TABLE
+                   + Add New Table
                  </button>
                </>
              )}
@@ -98,21 +98,21 @@ export default function TablesManagementList({ floor, tables, onRefresh, isManag
         {/* Bulk Action Toolbar */}
         {selectedIds.length > 0 && isManager && (
           <div className="mt-8 p-4 bg-stone-900 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 animate-fade-in-up">
-            <p className="text-stone-300 text-xs font-bold tracking-widest uppercase ml-2">
+            <p className="text-stone-300 text-xs font-medium ml-2">
               <span className="text-cafe-500">{selectedIds.length}</span> Objects Selected
             </p>
             <div className="flex items-center gap-3">
               <button 
                 onClick={handleBulkDuplicate}
-                className="px-5 py-2 bg-stone-800 text-stone-200 text-[10px] font-black tracking-widest uppercase hover:bg-stone-700 rounded-xl transition-all border border-stone-700 shadow-lg"
+                className="px-5 py-2 bg-stone-800 text-stone-200 text-[10px] font-semibold hover:bg-stone-700 rounded-xl transition-all border border-stone-700 shadow-lg"
               >
-                DUPLICATE SELECTION
+                Duplicate Selection
               </button>
               <button 
                 onClick={handleBulkDelete}
-                className="px-5 py-2 bg-rose-500/20 text-rose-500 text-[10px] font-black tracking-widest uppercase hover:bg-rose-500 hover:text-white rounded-xl transition-all border border-rose-500/30"
+                className="px-5 py-2 bg-rose-500/20 text-rose-500 text-[10px] font-semibold hover:bg-rose-500 hover:text-white rounded-xl transition-all border border-rose-500/30"
               >
-                PERMANENT DELETE
+                Permanent Delete
               </button>
             </div>
           </div>
@@ -124,11 +124,11 @@ export default function TablesManagementList({ floor, tables, onRefresh, isManag
         <table className="w-full text-left">
           <thead className="bg-stone-50/50 border-b border-stone-100">
             <tr>
-              {isManager && <th className="px-8 py-5 w-4 font-black"></th>}
-              <th className="px-8 py-5 text-[10px] font-black text-stone-400 uppercase tracking-widest">Table Name / No.</th>
-              <th className="px-8 py-5 text-[10px] font-black text-stone-400 uppercase tracking-widest">Recommended Seats</th>
-              <th className="px-8 py-5 text-[10px] font-black text-stone-400 uppercase tracking-widest">Availability Status</th>
-              <th className="px-8 py-5 text-right text-[10px] font-black text-stone-400 uppercase tracking-widest">Actions</th>
+              {isManager && <th className="px-8 py-5 w-4"></th>}
+              <th className="px-8 py-5 text-xs font-semibold text-stone-500">Table Name / No.</th>
+              <th className="px-8 py-5 text-xs font-semibold text-stone-500">Recommended Seats</th>
+              <th className="px-8 py-5 text-xs font-semibold text-stone-500">Availability Status</th>
+              <th className="px-8 py-5 text-right text-xs font-semibold text-stone-500">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-stone-50">
@@ -138,7 +138,7 @@ export default function TablesManagementList({ floor, tables, onRefresh, isManag
                  <td className="px-8 py-5">
                    <input 
                      placeholder="e.g. 101, T5, Window" autoFocus
-                     className="bg-white border-2 border-cafe-500/20 text-stone-800 text-xs font-bold p-3 rounded-xl focus:border-cafe-500 outline-none w-full shadow-inner"
+                     className="bg-white border-2 border-cafe-500/20 text-stone-800 text-xs font-medium p-3 rounded-xl focus:border-cafe-500 outline-none w-full shadow-inner"
                      value={newTable.tableNumber}
                      onChange={(e) => setNewTable({...newTable, tableNumber: e.target.value})}
                    />
@@ -146,21 +146,21 @@ export default function TablesManagementList({ floor, tables, onRefresh, isManag
                  <td className="px-8 py-5">
                     <input 
                       type="number" min="1" max="50"
-                      className="bg-white border-2 border-cafe-500/20 text-stone-800 text-xs font-bold p-3 rounded-xl focus:border-cafe-500 outline-none w-24 text-center shadow-inner"
+                      className="bg-white border-2 border-cafe-500/20 text-stone-800 text-xs font-medium p-3 rounded-xl focus:border-cafe-500 outline-none w-24 text-center shadow-inner"
                       value={newTable.seatsCount}
                       onChange={(e) => setNewTable({...newTable, seatsCount: Number(e.target.value)})}
                     />
                  </td>
                  <td className="px-8 py-5">
-                    <span className="text-[10px] font-black text-stone-400 uppercase">Draft State</span>
+                    <span className="text-xs font-medium text-stone-500">Draft State</span>
                  </td>
                  <td className="px-8 py-5 text-right">
                     <div className="flex items-center justify-end gap-3">
-                       <button onClick={() => setIsAdding(false)} className="text-[10px] font-black text-stone-400 uppercase tracking-widest hover:text-stone-600 transition-colors">Discard</button>
+                       <button onClick={() => setIsAdding(false)} className="text-xs font-semibold text-stone-500 hover:text-stone-700 transition-colors">Discard</button>
                        <button 
                          onClick={handleAddTable}
                          disabled={loading}
-                         className="bg-cafe-600 text-white text-[10px] font-black px-6 py-3 rounded-xl shadow-gold hover:bg-cafe-700 transition-all uppercase tracking-widest"
+                         className="bg-cafe-600 text-white text-xs font-semibold px-6 py-3 rounded-xl shadow-gold hover:bg-cafe-700 transition-all"
                        >
                          Initialize
                        </button>
@@ -191,19 +191,19 @@ export default function TablesManagementList({ floor, tables, onRefresh, isManag
                   )}
                   <td className="px-8 py-6">
                     <div className="flex items-center gap-4">
-                       <div className="w-10 h-10 rounded-2xl bg-white border border-stone-100 flex items-center justify-center font-black text-[11px] text-stone-800 shadow-sm group-hover:bg-cafe-50 transition-all group-hover:scale-110 group-hover:border-cafe-100 group-hover:text-cafe-700">
+                       <div className="w-10 h-10 rounded-2xl bg-white border border-stone-100 flex items-center justify-center font-bold text-sm text-stone-800 shadow-sm group-hover:bg-cafe-50 transition-all group-hover:scale-110 group-hover:border-cafe-100 group-hover:text-cafe-700">
                          {table.tableNumber}
                        </div>
                        <div>
-                         <p className="text-sm font-bold text-stone-800">{table.tableNumber}</p>
-                         <p className="text-[9px] text-stone-400 font-bold uppercase tracking-widest mt-0.5">Dining Asset</p>
+                         <p className="text-sm font-semibold text-stone-800">{table.tableNumber}</p>
+                         <p className="text-xs text-stone-400 mt-0.5">Dining Asset</p>
                        </div>
                     </div>
                   </td>
                   <td className="px-8 py-6">
                     <div className="flex items-center gap-1.5">
-                       <span className="text-xs font-black text-stone-800 px-2 py-0.5 bg-stone-100 rounded-md">{table.seatsCount}</span>
-                       <span className="text-[10px] text-stone-400 font-bold tracking-tight uppercase">Individuals</span>
+                       <span className="text-xs font-bold text-stone-800 px-2 py-0.5 bg-stone-100 rounded-md">{table.seatsCount}</span>
+                       <span className="text-xs text-stone-500">Seats</span>
                     </div>
                   </td>
                   <td className="px-8 py-6">
@@ -213,14 +213,14 @@ export default function TablesManagementList({ floor, tables, onRefresh, isManag
                       : 'bg-stone-100 border-stone-200 text-stone-500 grayscale'
                     }`}>
                       <div className={`w-1.5 h-1.5 rounded-full ${table.isActive ? 'bg-emerald-500 animate-pulse' : 'bg-stone-400'}`}></div>
-                      <span className="text-[10px] font-black uppercase tracking-widest">{table.isActive ? 'Active Plan' : 'Maintenance'}</span>
+                      <span className="text-xs font-medium">{table.isActive ? 'Active Plan' : 'Maintenance'}</span>
                     </div>
                   </td>
                   <td className="px-8 py-6 text-right">
                     {isManager && (
                       <button 
                         onClick={() => handleToggleActive(table)}
-                        className={`text-[9px] font-black uppercase tracking-tighter transition-all ${
+                        className={`text-xs font-semibold transition-all ${
                           table.isActive 
                           ? 'text-stone-400 hover:text-stone-600' 
                           : 'text-emerald-600 hover:text-emerald-700'

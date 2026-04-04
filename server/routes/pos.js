@@ -90,14 +90,14 @@ router.post(
 );
 
 // ─── PUT /api/pos/configs/:id ────────────────────────────────
-// Update POS terminal name (manager only)
+// Update POS terminal settings (manager only)
 router.put(
   '/configs/:id',
   authorize('manager'),
   [
     body('name')
+      .optional()
       .trim()
-      .notEmpty().withMessage('Terminal name is required')
       .isLength({ min: 2, max: 60 }).withMessage('Name must be 2-60 characters'),
   ],
   async (req, res) => {
@@ -107,9 +107,18 @@ router.put(
         return res.status(400).json({ success: false, message: errors.array()[0].msg });
       }
 
+      const update = {};
+      if (req.body.name) update.name = req.body.name.trim();
+      if (typeof req.body.isFloorPlanEnabled === 'boolean') update.isFloorPlanEnabled = req.body.isFloorPlanEnabled;
+      if (typeof req.body.isActive === 'boolean') update.isActive = req.body.isActive;
+
+      if (Object.keys(update).length === 0) {
+        return res.status(400).json({ success: false, message: 'No valid fields to update' });
+      }
+
       const config = await POSConfig.findByIdAndUpdate(
         req.params.id,
-        { name: req.body.name },
+        update,
         { new: true, runValidators: true }
       ).populate('createdBy', 'fullName username');
 

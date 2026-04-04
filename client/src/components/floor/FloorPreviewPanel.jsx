@@ -9,13 +9,13 @@ export default function FloorPreviewPanel({ tables, floorName }) {
              🗺️
            </div>
            <div>
-             <h3 className="font-display font-black text-stone-900 tracking-tight text-[11px] uppercase">Seating Blueprint</h3>
-             <p className="text-[10px] text-stone-400 font-bold tracking-widest uppercase mt-0.5">{floorName} Visual</p>
+             <h3 className="font-display font-bold text-stone-900 text-sm">Seating Blueprint</h3>
+             <p className="text-[10px] text-stone-400 font-medium mt-0.5">{floorName} Visual</p>
            </div>
          </div>
          <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <p className="text-[9px] text-emerald-700 font-black tracking-widest uppercase">Live View</p>
+            <p className="text-xs text-emerald-700 font-semibold">Live View</p>
          </div>
       </div>
 
@@ -26,7 +26,7 @@ export default function FloorPreviewPanel({ tables, floorName }) {
         {tables.length === 0 ? (
           <div className="text-center z-10">
             <div className="text-xl grayscale opacity-30 mb-2">🧊</div>
-            <p className="text-[10px] text-stone-400 font-bold uppercase tracking-widest">Blueprint Empty</p>
+            <p className="text-xs font-semibold text-stone-400">Blueprint Empty</p>
           </div>
         ) : (
           <div className="flex flex-wrap items-center justify-center gap-3 z-10 w-full">
@@ -39,7 +39,7 @@ export default function FloorPreviewPanel({ tables, floorName }) {
                   : 'bg-stone-100 border-stone-200 text-stone-400 grayscale'
                 }`}
               >
-                <span className="text-[10px] font-black">{table.tableNumber}</span>
+                <span className="text-[10px] font-bold">{table.tableNumber}</span>
                 <div className="flex items-center gap-0.5 mt-0.5">
                    {[...Array(Math.min(4, table.seatsCount))].map((_, idx) => (
                      <div key={idx} className={`w-1 h-1 rounded-full ${table.isActive ? 'bg-emerald-400' : 'bg-stone-300'}`}></div>
@@ -59,11 +59,11 @@ export default function FloorPreviewPanel({ tables, floorName }) {
       <div className="mt-4 flex flex-wrap gap-4 px-2">
          <div className="flex items-center gap-2">
             <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-200"></div>
-            <p className="text-[9px] text-stone-500 font-bold uppercase tracking-widest">Available Unit</p>
+            <p className="text-xs text-stone-500 font-medium">Available</p>
          </div>
          <div className="flex items-center gap-2">
             <div className="w-2.5 h-2.5 rounded-lg bg-stone-200 border border-stone-300"></div>
-            <p className="text-[9px] text-stone-500 font-bold uppercase tracking-widest">Maintenance Mode</p>
+            <p className="text-xs text-stone-500 font-medium">Maintenance</p>
          </div>
       </div>
     </div>

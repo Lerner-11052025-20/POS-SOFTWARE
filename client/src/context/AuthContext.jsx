@@ -70,7 +70,7 @@ export function AuthProvider({ children }) {
     const paths = {
       cashier: '/pos/floor',
       kitchen: '/kitchen',
-      customer: '/dashboard',
+      customer: '/pos/terminal/default',
       manager: '/dashboard',
     };
     return paths[role] || '/dashboard';
