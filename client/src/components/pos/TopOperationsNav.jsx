@@ -9,7 +9,6 @@ const NAV_ITEMS = [
   { label: 'Catalog', path: '/catalog', icon: Package },
   { label: 'Operations', path: '/operations', icon: ShoppingBag },
   { label: 'Floor Plan', path: '/pos/floor', icon: Map },
-  { label: 'Reporting', path: '/pos/reporting', icon: BarChart3, badge: 'Soon' },
 ];
 
 export default function TopOperationsNav({ user }) {
