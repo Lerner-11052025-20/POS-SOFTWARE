@@ -11,16 +11,23 @@ const COLOR_PALETTE = [
 ];
 
 function getChipStyle(color) {
-  if (!color) return {};
-  const hex = color.replace('#', '');
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return {
-    backgroundColor: `rgba(${r}, ${g}, ${b}, 0.12)`,
-    color: `rgb(${Math.max(r - 40, 0)}, ${Math.max(g - 40, 0)}, ${Math.max(b - 40, 0)})`,
-    borderColor: `rgba(${r}, ${g}, ${b}, 0.25)`,
-  };
+  if (!color || typeof color !== 'string' || !color.startsWith('#')) {
+    return { backgroundColor: '#f5f5f4', color: '#78716c', borderColor: '#e7e5e4' };
+  }
+  try {
+    const hex = color.replace('#', '');
+    const fullHex = hex.length === 3 ? hex.split('').map(c => c + c).join('') : hex;
+    const r = parseInt(fullHex.substring(0, 2), 16) || 0;
+    const g = parseInt(fullHex.substring(2, 4), 16) || 0;
+    const b = parseInt(fullHex.substring(4, 6), 16) || 0;
+    return {
+      backgroundColor: `rgba(${r}, ${g}, ${b}, 0.12)`,
+      color: `rgb(${Math.max(r - 40, 0)}, ${Math.max(g - 40, 0)}, ${Math.max(b - 40, 0)})`,
+      borderColor: `rgba(${r}, ${g}, ${b}, 0.25)`,
+    };
+  } catch (e) {
+    return { backgroundColor: '#f5f5f4', color: '#78716c', borderColor: '#e7e5e4' };
+  }
 }
 
 export default function CategoryManagementPanel({ isManager }) {
@@ -38,7 +45,7 @@ export default function CategoryManagementPanel({ isManager }) {
   const fetchCategories = useCallback(async () => {
     try {
       const res = await categoriesAPI.getAll();
-      if (res.data.success) setCategories(res.data.categories);
+      if (res.data.success) setCategories(res.data.categories.sort((a, b) => a.name.localeCompare(b.name)));
     } catch { toast.error('Failed to load categories'); }
     finally { setLoading(false); }
   }, []);
@@ -52,9 +59,9 @@ export default function CategoryManagementPanel({ isManager }) {
     try {
       const res = await categoriesAPI.create({ name: newName.trim(), color: newColor });
       if (res.data.success) {
-        setCategories((prev) => [...prev, res.data.category]);
+        setCategories((prev) => [...prev, res.data.category].sort((a, b) => a.name.localeCompare(b.name)));
         setNewName(''); setNewColor('#F59E0B'); setShowCreate(false);
-        toast.success('Category created!', { icon: '🏷️' });
+        toast.success(res.data.message || 'Category created!', { icon: '🏷️' });
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to create category');
@@ -70,7 +77,7 @@ export default function CategoryManagementPanel({ isManager }) {
     try {
       const res = await categoriesAPI.update(editId, { name: editName.trim(), color: editColor });
       if (res.data.success) {
-        setCategories((prev) => prev.map((c) => c._id === editId ? res.data.category : c));
+        setCategories((prev) => prev.map((c) => c._id === editId ? res.data.category : c).sort((a, b) => a.name.localeCompare(b.name)));
         setEditId(null); toast.success('Category updated');
       }
     } catch (err) { toast.error(err.response?.data?.message || 'Update failed'); }

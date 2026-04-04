@@ -75,7 +75,7 @@ export default function ProductVariantsTab({ variants, onChange }) {
               <div className="sm:col-span-3">
                 <label className="sm:hidden text-[9px] text-stone-400 uppercase tracking-wider font-semibold mb-1 block">Extra Price</label>
                 <input type="number" min="0" step="0.01" value={v.extraPrice}
-                  onChange={(e) => updateRow(i, 'extraPrice', Number(e.target.value))}
+                  onChange={(e) => updateRow(i, 'extraPrice', Number(e.target.value) || 0)}
                   placeholder="0" className="auth-input text-xs !py-2" />
               </div>
               <div className="sm:col-span-1 flex items-center justify-end sm:justify-center">

@@ -15,7 +15,8 @@ router.get('/', authorize('manager', 'cashier'), async (req, res) => {
     if (active !== 'all') filter.isActive = active !== 'false';
     if (category) filter.category = category;
     if (search && search.trim()) {
-      filter.name = { $regex: search.trim(), $options: 'i' };
+      const searchEscaped = search.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      filter.name = { $regex: searchEscaped, $options: 'i' };
     }
 
     const products = await Product.find(filter)
@@ -81,6 +82,9 @@ router.post(
       res.status(201).json({ success: true, product: populated });
     } catch (err) {
       console.error('Create product error:', err);
+      if (err.name === 'ValidationError') {
+        return res.status(400).json({ success: false, message: Object.values(err.errors)[0].message });
+      }
       res.status(500).json({ success: false, message: 'Server error' });
     }
   }
@@ -106,6 +110,9 @@ router.put('/:id', authorize('manager'), async (req, res) => {
     res.json({ success: true, product });
   } catch (err) {
     console.error('Update product error:', err);
+    if (err.name === 'ValidationError') {
+      return res.status(400).json({ success: false, message: Object.values(err.errors)[0].message });
+    }
     res.status(500).json({ success: false, message: 'Server error' });
   }
 });

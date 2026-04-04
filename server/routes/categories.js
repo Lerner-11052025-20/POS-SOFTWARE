@@ -34,11 +34,21 @@ router.post(
         return res.status(400).json({ success: false, message: errors.array()[0].msg });
       }
 
-      // Duplicate check
+      // Duplicate check (including deactivated ones)
+      const nameEscaped = req.body.name.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       const existing = await Category.findOne({
-        name: { $regex: new RegExp(`^${req.body.name.trim()}$`, 'i') },
+        name: { $regex: new RegExp(`^${nameEscaped}$`, 'i') },
       });
+
       if (existing) {
+        if (!existing.isActive) {
+          // If it exists but is inactive, reactivate it instead of erroring
+          existing.isActive = true;
+          existing.color = req.body.color || existing.color;
+          existing.createdBy = req.user._id;
+          await existing.save();
+          return res.status(200).json({ success: true, category: existing, message: 'Existing category reactivated' });
+        }
         return res.status(400).json({
           success: false,
           message: 'A category with this name already exists',
@@ -68,8 +78,9 @@ router.put('/:id', authorize('manager'), async (req, res) => {
     if (color) update.color = color;
 
     if (name) {
+      const nameEscaped = name.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       const dup = await Category.findOne({
-        name: { $regex: new RegExp(`^${name.trim()}$`, 'i') },
+        name: { $regex: new RegExp(`^${nameEscaped}$`, 'i') },
         _id: { $ne: req.params.id },
       });
       if (dup) {
@@ -86,6 +97,10 @@ router.put('/:id', authorize('manager'), async (req, res) => {
     }
     res.json({ success: true, category });
   } catch (err) {
+    console.error('Update category error:', err);
+    if (err.name === 'ValidationError') {
+      return res.status(400).json({ success: false, message: Object.values(err.errors)[0].message });
+    }
     res.status(500).json({ success: false, message: 'Server error' });
   }
 });

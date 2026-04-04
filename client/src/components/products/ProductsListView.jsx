@@ -8,17 +8,23 @@ function formatCurrency(a) {
 }
 
 function getCategoryChipStyle(color) {
-  if (!color) return { backgroundColor: '#f5f5f4', color: '#78716c' };
-  // Generate soft pastel bg from hex
-  const hex = color.replace('#', '');
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return {
-    backgroundColor: `rgba(${r}, ${g}, ${b}, 0.12)`,
-    color: `rgb(${Math.max(r - 40, 0)}, ${Math.max(g - 40, 0)}, ${Math.max(b - 40, 0)})`,
-    borderColor: `rgba(${r}, ${g}, ${b}, 0.25)`,
-  };
+  if (!color || typeof color !== 'string' || !color.startsWith('#')) {
+    return { backgroundColor: '#f5f5f4', color: '#78716c', borderColor: '#e7e5e4' };
+  }
+  try {
+    const hex = color.replace('#', '');
+    const fullHex = hex.length === 3 ? hex.split('').map(c => c + c).join('') : hex;
+    const r = parseInt(fullHex.substring(0, 2), 16) || 0;
+    const g = parseInt(fullHex.substring(2, 4), 16) || 0;
+    const b = parseInt(fullHex.substring(4, 6), 16) || 0;
+    return {
+      backgroundColor: `rgba(${r}, ${g}, ${b}, 0.12)`,
+      color: `rgb(${Math.max(r - 40, 0)}, ${Math.max(g - 40, 0)}, ${Math.max(b - 40, 0)})`,
+      borderColor: `rgba(${r}, ${g}, ${b}, 0.25)`,
+    };
+  } catch (e) {
+    return { backgroundColor: '#f5f5f4', color: '#78716c', borderColor: '#e7e5e4' };
+  }
 }
 
 export default function ProductsListView({ isManager, onEdit }) {

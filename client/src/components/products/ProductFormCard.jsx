@@ -45,7 +45,7 @@ export default function ProductFormCard({ product, onSave, onCancel }) {
         salePrice: Number(form.salePrice),
         tax: Number(form.tax),
         category: form.category || null,
-        variants,
+        variants: variants.filter((v) => v.attribute.trim() && v.value.trim()),
       };
       if (isEdit) {
         await productsAPI.update(product._id, payload);
@@ -121,9 +121,17 @@ export default function ProductFormCard({ product, onSave, onCancel }) {
                   <select value={form.category} onChange={(e) => updateField('category', e.target.value)}
                     className="auth-input text-sm">
                     <option value="">No Category</option>
-                    {categories.map((c) => (
-                      <option key={c._id} value={c._id}>{c.name}</option>
-                    ))}
+                    {(() => {
+                      const options = [...categories];
+                      if (product?.category && !categories.some(c => c._id === (product.category._id || product.category))) {
+                        // Handle both populated and populated-only-ID cases
+                        const catObj = typeof product.category === 'object' ? product.category : { _id: product.category, name: 'Current Category' };
+                        options.unshift(catObj);
+                      }
+                      return options.map((c) => (
+                        <option key={c._id} value={c._id}>{c.name}{!c.isActive && ' (Archived)'}</option>
+                      ));
+                    })()}
                   </select>
                   <p className="text-[10px] text-stone-400 mt-1">Categories help structure the POS menu for faster ordering.</p>
                 </div>
