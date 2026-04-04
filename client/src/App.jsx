@@ -9,6 +9,7 @@ import FloorManagementPage from './pages/pos/FloorManagementPage';
 import POSTerminalFloorViewPage from './pages/pos/POSTerminalFloorViewPage';
 import CustomerMenuPage from './pages/customer/CustomerMenuPage';
 import OrderProgressPage from './pages/customer/OrderProgressPage';
+import KitchenDisplayPage from './pages/pos/KitchenDisplayPage';
 import UnauthorizedPage from './pages/UnauthorizedPage';
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -118,14 +119,22 @@ export default function App() {
 
 
       <Route
-        path="/kitchen"
+        path="/pos/kitchen"
         element={
           <ProtectedRoute allowedRoles={['kitchen', 'manager']}>
-            <Dashboard />
+            <KitchenDisplayPage />
           </ProtectedRoute>
         }
       />
 
+      <Route
+        path="/kitchen"
+        element={
+          <ProtectedRoute allowedRoles={['kitchen', 'manager']}>
+            <KitchenDisplayPage />
+          </ProtectedRoute>
+        }
+      />
       <Route
         path="/customer"
         element={

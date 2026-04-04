@@ -152,4 +152,34 @@ router.patch('/:id/status', authorize('manager', 'cashier', 'kitchen'), async (r
   }
 });
 
+// PATCH /api/orders/:orderId/items/:lineId/prepared — Mark item as prepared (Kitchen)
+router.patch('/:orderId/items/:lineId/prepared', authorize('manager', 'kitchen'), async (req, res) => {
+  try {
+    const { isPrepared } = req.body;
+    const order = await Order.findById(req.params.orderId);
+    
+    if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
+
+    const lineItem = order.lines.id(req.params.lineId);
+    if (!lineItem) return res.status(404).json({ success: false, message: 'Item not found' });
+
+    lineItem.isPrepared = isPrepared;
+    lineItem.preparedAt = isPrepared ? Date.now() : null;
+
+    await order.save();
+
+    // Notify listeners (including customer if they are on progress screen)
+    emitOrderUpdate(order._id, { 
+      status: order.status, 
+      message: `Item ${lineItem.product} is ${isPrepared ? 'done' : 'pending'}`,
+      updatedAt: Date.now() 
+    });
+
+    res.json({ success: true, order });
+  } catch (err) {
+    console.error('Update item preparation error:', err);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
 module.exports = router;
