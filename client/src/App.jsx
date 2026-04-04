@@ -32,7 +32,6 @@ export default function App() {
 
   return (
     <Routes>
-      {/* Auth Routes */}
       <Route
         path="/login"
         element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <AuthPage />}
@@ -42,7 +41,6 @@ export default function App() {
         element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <AuthPage />}
       />
 
-      {/* Protected Routes */}
       <Route
         path="/dashboard"
         element={
@@ -52,7 +50,6 @@ export default function App() {
         }
       />
 
-      {/* POS Configuration — Manager + Cashier */}
       <Route
         path="/pos/config"
         element={
@@ -70,7 +67,6 @@ export default function App() {
         }
       />
 
-      {/* Operations — Orders, Payments, Customers */}
       <Route
         path="/operations"
         element={
@@ -80,7 +76,6 @@ export default function App() {
         }
       />
 
-      {/* Catalog — Products, Categories */}
       <Route
         path="/catalog"
         element={
@@ -90,7 +85,6 @@ export default function App() {
         }
       />
 
-      {/* POS Floor Selection */}
       <Route
         path="/pos/floor"
         element={
@@ -108,7 +102,6 @@ export default function App() {
         }
       />
 
-      {/* Kitchen */}
       <Route
         path="/kitchen"
         element={
@@ -118,7 +111,6 @@ export default function App() {
         }
       />
 
-      {/* Customer */}
       <Route
         path="/customer/*"
         element={
@@ -128,7 +120,6 @@ export default function App() {
         }
       />
 
-      {/* Unauthorized */}
       <Route
         path="/unauthorized"
         element={
@@ -138,7 +129,6 @@ export default function App() {
         }
       />
 
-      {/* Default redirect */}
       <Route path="/" element={<Navigate to={isAuthenticated ? '/dashboard' : '/login'} replace />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

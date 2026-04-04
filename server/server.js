@@ -5,17 +5,12 @@ const rateLimit = require('express-rate-limit');
 const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 
-// Load env vars
 dotenv.config();
 
-// Connect to MongoDB Atlas
 connectDB();
 
 const app = express();
 
-// — Middleware —
-
-// CORS — allow frontend
 app.use(
   cors({
     origin: ['http://localhost:8080', 'http://127.0.0.1:8080'],
@@ -23,17 +18,14 @@ app.use(
   })
 );
 
-// Body parser
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Cookie parser
 app.use(cookieParser());
 
-// Rate limiting for auth routes
 const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5000, // 50 requests per window
+  windowMs: 15 * 60 * 1000, 
+  max: 5000, 
   message: {
     success: false,
     message: 'Too many requests. Please try again in 15 minutes.',
@@ -42,7 +34,6 @@ const authLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// — Routes —
 app.use('/api/auth', authLimiter, require('./routes/auth'));
 app.use('/api/pos', authLimiter, require('./routes/pos'));
 app.use('/api/orders', authLimiter, require('./routes/orders'));
@@ -53,7 +44,6 @@ app.use('/api/categories', authLimiter, require('./routes/categories'));
 app.use('/api/floors', authLimiter, require('./routes/floors'));
 app.use('/api/tables', authLimiter, require('./routes/tables'));
 
-// Health check
 app.get('/api/health', (req, res) => {
   res.json({
     success: true,
@@ -62,7 +52,6 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// 404 handler
 app.use('*', (req, res) => {
   res.status(404).json({
     success: false,
@@ -70,7 +59,6 @@ app.use('*', (req, res) => {
   });
 });
 
-// Global error handler
 app.use((err, req, res, next) => {
   console.error('Server Error:', err);
   res.status(err.statusCode || 500).json({
@@ -79,7 +67,6 @@ app.use((err, req, res, next) => {
   });
 });
 
-// — Start Server —
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
