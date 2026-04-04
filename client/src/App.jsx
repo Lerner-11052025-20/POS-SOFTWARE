@@ -8,6 +8,7 @@ import ProductCategoryManagementPage from './pages/pos/ProductCategoryManagement
 import FloorManagementPage from './pages/pos/FloorManagementPage';
 import POSTerminalFloorViewPage from './pages/pos/POSTerminalFloorViewPage';
 import CustomerMenuPage from './pages/customer/CustomerMenuPage';
+import OrderProgressPage from './pages/customer/OrderProgressPage';
 import UnauthorizedPage from './pages/UnauthorizedPage';
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -146,6 +147,15 @@ export default function App() {
         element={
           <ProtectedRoute allowedRoles={['customer']}>
             <Dashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/customer/order-progress"
+        element={
+          <ProtectedRoute allowedRoles={['customer', 'cashier', 'manager']}>
+            <OrderProgressPage />
           </ProtectedRoute>
         }
       />

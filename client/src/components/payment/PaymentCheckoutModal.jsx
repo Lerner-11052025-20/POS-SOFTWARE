@@ -3,6 +3,7 @@ import { X, CreditCard, ShieldCheck } from 'lucide-react';
 import { ordersAPI } from '../../services/api';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 
 // Utility to load Razorpay script
 const loadRazorpayScript = () => {
@@ -21,6 +22,7 @@ const loadRazorpayScript = () => {
 
 export default function PaymentCheckoutModal({ isOpen, onClose, orderTotal, orderPayload, onSuccess }) {
   const [isProcessing, setIsProcessing] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (isOpen) {
@@ -35,30 +37,26 @@ export default function PaymentCheckoutModal({ isOpen, onClose, orderTotal, orde
     const toastId = toast.loading('Initializing secure checkout...');
 
     try {
-      // 1. First, create the Odoo POS Local Order
+      // 1. Create Local Order
       const localOrderRes = await ordersAPI.create(orderPayload);
       if (!localOrderRes.data.success) {
-        throw new Error('Failed to create local order');
+        throw new Error('Order creation failed');
       }
       const localOrder = localOrderRes.data.order;
 
       // 2. Request Razorpay Order from Backend
-      toast.loading('Connecting to Razorpay gateway...', { id: toastId });
-      
       const rzpOrderRes = await api.post(`/payments/razorpay/create-order`, {
         amount: orderTotal,
-        receipt: localOrder._id || `receipt_${Date.now()}`,
+        receipt: localOrder._id,
       });
 
-      if (!rzpOrderRes.data.success) {
-        throw new Error('Could not initialize Razorpay order');
-      }
+      if (!rzpOrderRes.data.success) throw new Error('Razorpay initialization failed');
 
       const { amount, id: order_id, currency } = rzpOrderRes.data.order;
 
       // 3. Open Razorpay Checkout Modal
       const options = {
-        key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_SZYyLMrB7N4Q2r', // safe public key
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_SZYyLMrB7N4Q2r',
         amount: amount,
         currency: currency,
         name: 'Odoo POS Cafe',
@@ -79,8 +77,9 @@ export default function PaymentCheckoutModal({ isOpen, onClose, orderTotal, orde
             });
 
             if (verifyRes.data.success) {
-              toast.success('Payment Successful! Order placed.', { id: toastId });
-              onSuccess(); // Trigger clear cart & close
+              toast.success('Order Placed Successfully!', { id: toastId });
+              onSuccess(); // Clear cart in Menu page
+              navigate('/customer/order-progress', { state: { order: localOrder } });
             } else {
               toast.error('Payment Verification Failed.', { id: toastId });
               setIsProcessing(false);
@@ -92,15 +91,12 @@ export default function PaymentCheckoutModal({ isOpen, onClose, orderTotal, orde
           }
         },
         prefill: {
-          name: 'Walk-in Customer',
+          name: 'Customer',
           email: 'customer@odooposcafe.com',
           contact: '9999999999',
         },
-        notes: {
-          address: 'Odoo POS Cafe HQ',
-        },
         theme: {
-          color: '#EA580C', // Tailwind cafe-600
+          color: '#EA580C',
         },
         modal: {
           ondismiss: function () {

@@ -6,9 +6,12 @@ const orderLineSchema = new mongoose.Schema({
   unitPrice: { type: Number, required: true, min: 0 },
   tax: { type: Number, default: 0 },
   uom: { type: String, default: 'Unit', trim: true },
+  category: { type: String, default: 'General' },
   subtotal: { type: Number, default: 0 },
   total: { type: Number, default: 0 },
   notes: { type: String, default: '', trim: true },
+  isPrepared: { type: Boolean, default: false },
+  preparedAt: { type: Date }
 });
 
 const orderSchema = new mongoose.Schema(
@@ -43,7 +46,7 @@ const orderSchema = new mongoose.Schema(
     notes: { type: String, default: '', trim: true },
     status: {
       type: String,
-      enum: ['draft', 'paid', 'cancelled'],
+      enum: ['draft', 'confirmed', 'preparing', 'ready', 'served', 'completed', 'cancelled', 'paid'],
       default: 'draft',
     },
     lines: [orderLineSchema],

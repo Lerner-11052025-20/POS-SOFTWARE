@@ -1,6 +1,7 @@
 const express = require('express');
 const Order = require('../models/Order');
 const { protect, authorize } = require('../middleware/auth');
+const { emitOrderUpdate } = require('../utils/socket');
 
 const router = express.Router();
 router.use(protect);
@@ -64,6 +65,13 @@ router.post('/', authorize('manager', 'cashier', 'customer'), async (req, res) =
       .populate('customer', 'name email phone')
       .populate('createdBy', 'fullName');
 
+    // Notify listeners about new order (Kitchen)
+    emitOrderUpdate(order._id, { 
+      status: 'confirmed', 
+      message: 'New order confirmed',
+      order: populated 
+    });
+
     res.status(201).json({ success: true, order: populated });
   } catch (err) {
     console.error('Create order error:', err);
@@ -106,6 +114,40 @@ router.delete('/', authorize('manager'), async (req, res) => {
     await Order.deleteMany({ _id: { $in: ids }, status: 'draft' });
     res.json({ success: true, message: `${ids.length} draft order(s) deleted` });
   } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// PATCH /api/orders/:id/status — Update order status (Staff/Kitchen)
+router.patch('/:id/status', authorize('manager', 'cashier', 'kitchen'), async (req, res) => {
+  try {
+    const { status, message } = req.body;
+    const allowedStatuses = ['confirmed', 'preparing', 'ready', 'served', 'completed', 'cancelled'];
+    
+    if (!allowedStatuses.includes(status)) {
+      return res.status(400).json({ success: false, message: 'Invalid status' });
+    }
+
+    const order = await Order.findByIdAndUpdate(
+      req.params.id,
+      { status, updatedAt: Date.now() },
+      { new: true }
+    );
+
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Order not found' });
+    }
+
+    // Emit real-time update to customer room
+    emitOrderUpdate(order._id, { 
+      status, 
+      message: message || `Order switched to ${status}`,
+      updatedAt: order.updatedAt 
+    });
+
+    res.json({ success: true, order });
+  } catch (err) {
+    console.error('Update order status error:', err);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 });
