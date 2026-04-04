@@ -14,7 +14,7 @@ const ROLE_COPY = {
   manager: { access: 'Configure operations, monitor performance, and manage staff.' },
 };
 
-// ✅ EXTRACTED OUTSIDE to prevent remount on every keystroke
+
 function InputField({ icon: Icon, label, field, type = 'text', placeholder, disabled, autoComplete, value, onChange, onBlur, hasError, isValid, errorMsg, showPw, onTogglePw, loading: isLoading }) {
   const isPassword = type === 'password';
 
