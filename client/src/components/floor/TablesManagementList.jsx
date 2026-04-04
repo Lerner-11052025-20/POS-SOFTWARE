@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { tablesAPI } from '../../services/api';
+import TableFormModal from './TableFormModal';
 
 export default function TablesManagementList({ floor, tables, onRefresh, isManager, onEditFloor }) {
   const [selectedIds, setSelectedIds] = useState([]);
-  const [newTable, setNewTable] = useState({ tableNumber: '', seatsCount: 4 });
-  const [isAdding, setIsAdding] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [showTableModal, setShowTableModal] = useState(false);
 
   const toggleSelect = (id) => {
     setSelectedIds((prev) => 
@@ -23,21 +22,7 @@ export default function TablesManagementList({ floor, tables, onRefresh, isManag
     }
   };
 
-  const handleAddTable = async (e) => {
-    e.preventDefault();
-    if (!newTable.tableNumber.trim()) return;
-    try {
-      setLoading(true);
-      await tablesAPI.create({ ...newTable, floor: floor._id });
-      setNewTable({ tableNumber: '', seatsCount: 4 });
-      setIsAdding(false);
-      onRefresh();
-    } catch (err) {
-      alert(err.response?.data?.message || 'Failed to add table');
-    } finally {
-      setLoading(false);
-    }
-  };
+
 
   const handleBulkDelete = async () => {
     if (!window.confirm(`Permanently remove ${selectedIds.length} tables?`)) return;
@@ -85,7 +70,7 @@ export default function TablesManagementList({ floor, tables, onRefresh, isManag
                    Manage Floor Settings
                  </button>
                  <button 
-                   onClick={() => setIsAdding(true)}
+                   onClick={() => setShowTableModal(true)}
                    className="px-6 py-3 bg-cafe-600 text-white text-xs font-semibold rounded-xl shadow-gold hover:bg-cafe-700 hover:scale-[1.02] active:scale-95 transition-all"
                  >
                    + Add New Table
@@ -97,20 +82,20 @@ export default function TablesManagementList({ floor, tables, onRefresh, isManag
 
         {/* Bulk Action Toolbar */}
         {selectedIds.length > 0 && isManager && (
-          <div className="mt-8 p-4 bg-stone-900 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 animate-fade-in-up">
-            <p className="text-stone-300 text-xs font-medium ml-2">
-              <span className="text-cafe-500">{selectedIds.length}</span> Objects Selected
+          <div className="mt-8 p-4 bg-amber-50 border border-amber-100/50 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 animate-fade-in-up shadow-sm">
+            <p className="text-stone-700 text-xs font-medium ml-2">
+              <span className="text-cafe-600 font-bold">{selectedIds.length}</span> Objects Selected
             </p>
             <div className="flex items-center gap-3">
               <button 
                 onClick={handleBulkDuplicate}
-                className="px-5 py-2 bg-stone-800 text-stone-200 text-[10px] font-semibold hover:bg-stone-700 rounded-xl transition-all border border-stone-700 shadow-lg"
+                className="px-5 py-2 bg-white text-stone-600 text-xs font-semibold hover:bg-stone-50 rounded-xl transition-all border border-stone-200 shadow-sm"
               >
                 Duplicate Selection
               </button>
               <button 
                 onClick={handleBulkDelete}
-                className="px-5 py-2 bg-rose-500/20 text-rose-500 text-[10px] font-semibold hover:bg-rose-500 hover:text-white rounded-xl transition-all border border-rose-500/30"
+                className="px-5 py-2 bg-white text-rose-600 text-xs font-semibold hover:bg-rose-50 hover:border-rose-200 rounded-xl transition-all border border-stone-200 shadow-sm"
               >
                 Permanent Delete
               </button>
@@ -132,44 +117,9 @@ export default function TablesManagementList({ floor, tables, onRefresh, isManag
             </tr>
           </thead>
           <tbody className="divide-y divide-stone-50">
-            {isAdding && (
-               <tr className="bg-cafe-50/30 animate-fade-in">
-                 <td className="px-8 py-5"></td>
-                 <td className="px-8 py-5">
-                   <input 
-                     placeholder="e.g. 101, T5, Window" autoFocus
-                     className="bg-white border-2 border-cafe-500/20 text-stone-800 text-xs font-medium p-3 rounded-xl focus:border-cafe-500 outline-none w-full shadow-inner"
-                     value={newTable.tableNumber}
-                     onChange={(e) => setNewTable({...newTable, tableNumber: e.target.value})}
-                   />
-                 </td>
-                 <td className="px-8 py-5">
-                    <input 
-                      type="number" min="1" max="50"
-                      className="bg-white border-2 border-cafe-500/20 text-stone-800 text-xs font-medium p-3 rounded-xl focus:border-cafe-500 outline-none w-24 text-center shadow-inner"
-                      value={newTable.seatsCount}
-                      onChange={(e) => setNewTable({...newTable, seatsCount: Number(e.target.value)})}
-                    />
-                 </td>
-                 <td className="px-8 py-5">
-                    <span className="text-xs font-medium text-stone-500">Draft State</span>
-                 </td>
-                 <td className="px-8 py-5 text-right">
-                    <div className="flex items-center justify-end gap-3">
-                       <button onClick={() => setIsAdding(false)} className="text-xs font-semibold text-stone-500 hover:text-stone-700 transition-colors">Discard</button>
-                       <button 
-                         onClick={handleAddTable}
-                         disabled={loading}
-                         className="bg-cafe-600 text-white text-xs font-semibold px-6 py-3 rounded-xl shadow-gold hover:bg-cafe-700 transition-all"
-                       >
-                         Initialize
-                       </button>
-                    </div>
-                 </td>
-               </tr>
-            )}
+
             
-            {tables.length === 0 && !isAdding ? (
+            {tables.length === 0 ? (
               <tr>
                 <td colSpan="5" className="p-20 text-center animate-fade-in">
                    <div className="text-4xl opacity-30 grayscale mb-4">🪑</div>
@@ -236,6 +186,16 @@ export default function TablesManagementList({ floor, tables, onRefresh, isManag
           </tbody>
         </table>
       </div>
+
+      <TableFormModal 
+        isOpen={showTableModal} 
+        onClose={() => setShowTableModal(false)}
+        onSuccess={() => {
+          setShowTableModal(false);
+          onRefresh();
+        }}
+        floorId={floor._id}
+      />
     </div>
   );
 }
