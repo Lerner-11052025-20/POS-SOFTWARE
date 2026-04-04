@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Coffee, LogOut, LayoutGrid, ShoppingBag, BarChart3, ChevronDown, User, Settings, Package } from 'lucide-react';
+import { Coffee, LogOut, LayoutGrid, ShoppingBag, BarChart3, ChevronDown, User, Settings, Package, Map } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 const NAV_ITEMS = [
@@ -8,6 +8,7 @@ const NAV_ITEMS = [
   { label: 'POS Config', path: '/pos/config', icon: Settings },
   { label: 'Catalog', path: '/catalog', icon: Package },
   { label: 'Operations', path: '/operations', icon: ShoppingBag },
+  { label: 'Floor Plan', path: '/pos/floor', icon: Map },
   { label: 'Reporting', path: '/pos/reporting', icon: BarChart3, badge: 'Soon' },
 ];
 

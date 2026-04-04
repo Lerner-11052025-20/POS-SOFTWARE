@@ -10,7 +10,7 @@ export default function FloorPreviewPanel({ tables, floorName }) {
            </div>
            <div>
              <h3 className="font-display font-bold text-stone-900 text-sm">Seating Blueprint</h3>
-             <p className="text-[10px] text-stone-400 font-medium mt-0.5">{floorName} Visual</p>
+             <p className="text-xs text-stone-500 font-medium mt-0.5">{floorName} Visual</p>
            </div>
          </div>
          <div className="flex items-center gap-2">
@@ -33,22 +33,23 @@ export default function FloorPreviewPanel({ tables, floorName }) {
             {tables.slice(0, 15).map((table, i) => (
               <div 
                 key={table._id}
-                className={`w-12 h-12 rounded-xl flex flex-col items-center justify-center border-2 transition-all cursor-default shadow-sm ${
+                className={`w-16 h-16 mx-1 my-1 rounded-xl flex flex-col items-center justify-center border-2 transition-all cursor-default shadow-sm ${
                   table.isActive 
                   ? 'bg-white border-emerald-100 text-emerald-800 hover:scale-105 hover:border-emerald-500' 
                   : 'bg-stone-100 border-stone-200 text-stone-400 grayscale'
                 }`}
               >
-                <span className="text-[10px] font-bold">{table.tableNumber}</span>
-                <div className="flex items-center gap-0.5 mt-0.5">
-                   {[...Array(Math.min(4, table.seatsCount))].map((_, idx) => (
-                     <div key={idx} className={`w-1 h-1 rounded-full ${table.isActive ? 'bg-emerald-400' : 'bg-stone-300'}`}></div>
-                   ))}
+                <span className="text-sm font-bold mb-1 leading-none">{table.tableNumber}</span>
+                <div className={`flex items-center gap-1 px-1.5 py-0.5 rounded-md ${table.isActive ? 'bg-emerald-100/60 text-emerald-700' : 'bg-stone-200/60 text-stone-500'}`}>
+                   <span className="text-xs font-bold leading-none">{table.seatsCount}</span>
+                   <svg className="w-3 h-3 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                   </svg>
                 </div>
               </div>
             ))}
             {tables.length > 15 && (
-              <div className="w-12 h-12 rounded-xl bg-stone-100 border border-stone-200 flex items-center justify-center text-[10px] font-bold text-stone-400 italic">
+              <div className="w-16 h-16 mx-1 my-1 rounded-xl bg-stone-100 border border-stone-200 flex items-center justify-center text-sm font-bold text-stone-400 italic">
                 +{tables.length - 15}
               </div>
             )}
