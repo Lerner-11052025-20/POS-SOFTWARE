@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, CreditCard, ShieldCheck } from 'lucide-react';
 import { ordersAPI } from '../../services/api';
-import axios from 'axios';
+import api from '../../services/api';
 import toast from 'react-hot-toast';
 
 // Utility to load Razorpay script
@@ -44,15 +44,10 @@ export default function PaymentCheckoutModal({ isOpen, onClose, orderTotal, orde
 
       // 2. Request Razorpay Order from Backend
       toast.loading('Connecting to Razorpay gateway...', { id: toastId });
-      const apiBaseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
       
-      const rzpOrderRes = await axios.post(`${apiBaseURL}/payments/razorpay/create-order`, {
+      const rzpOrderRes = await api.post(`/payments/razorpay/create-order`, {
         amount: orderTotal,
         receipt: localOrder._id || `receipt_${Date.now()}`,
-      }, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        }
       });
 
       if (!rzpOrderRes.data.success) {
@@ -75,16 +70,12 @@ export default function PaymentCheckoutModal({ isOpen, onClose, orderTotal, orde
           
           try {
             // 4. Verify Payment Signature Backend
-            const verifyRes = await axios.post(`${apiBaseURL}/payments/razorpay/verify`, {
+            const verifyRes = await api.post(`/payments/razorpay/verify`, {
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_order_id: response.razorpay_order_id,
               razorpay_signature: response.razorpay_signature,
               amount: orderTotal,
               orderId: localOrder._id
-            }, {
-              headers: {
-                Authorization: `Bearer ${localStorage.getItem('token')}`
-              }
             });
 
             if (verifyRes.data.success) {
