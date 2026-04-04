@@ -6,7 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 const NAV_ITEMS = [
   { label: 'Dashboard', path: '/dashboard', icon: LayoutGrid },
   { label: 'POS Config', path: '/pos/config', icon: Settings },
-  { label: 'Orders', path: '/pos/orders', icon: ShoppingBag, badge: 'Soon' },
+  { label: 'Operations', path: '/operations', icon: ShoppingBag },
   { label: 'Reporting', path: '/pos/reporting', icon: BarChart3, badge: 'Soon' },
 ];
 

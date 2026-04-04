@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { LogOut, Coffee, Monitor, LayoutGrid, ChefHat, ShoppingBag, BarChart3, Settings } from 'lucide-react';
+import { LogOut, Coffee, Monitor, LayoutGrid, ChefHat, ShoppingBag, BarChart3, Settings, ClipboardList } from 'lucide-react';
 
 const ROLE_FEATURES = {
   cashier: {
@@ -10,7 +10,7 @@ const ROLE_FEATURES = {
     color: 'from-cafe-500 to-amber-500',
     quickActions: [
       { label: 'POS Config', path: '/pos/config', icon: Monitor, ready: true },
-      { label: 'View Floor Plan', path: '/pos/floor', icon: LayoutGrid, ready: false },
+      { label: 'Operations', path: '/operations', icon: ClipboardList, ready: true },
       { label: 'New Order', path: '/pos/orders', icon: ShoppingBag, ready: false },
     ],
   },
@@ -43,7 +43,7 @@ const ROLE_FEATURES = {
     color: 'from-violet-500 to-purple-500',
     quickActions: [
       { label: 'POS Config', path: '/pos/config', icon: Monitor, ready: true },
-      { label: 'Reports', path: '/pos/reporting', icon: BarChart3, ready: false },
+      { label: 'Operations', path: '/operations', icon: ClipboardList, ready: true },
       { label: 'Settings', path: '/pos/config', icon: Settings, ready: true },
     ],
   },

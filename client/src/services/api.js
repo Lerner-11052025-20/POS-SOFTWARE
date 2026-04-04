@@ -56,4 +56,28 @@ export const posAPI = {
   getSessions: (id) => api.get(`/pos/configs/${id}/sessions`),
 };
 
+// Orders API calls
+export const ordersAPI = {
+  getAll: (params) => api.get('/orders', { params }),
+  getById: (id) => api.get(`/orders/${id}`),
+  create: (data) => api.post('/orders', data),
+  archive: (ids) => api.put('/orders/archive', { ids }),
+  deleteDrafts: (ids) => api.delete('/orders', { data: { ids } }),
+};
+
+// Payments API calls
+export const paymentsAPI = {
+  getAll: () => api.get('/payments'),
+  getGrouped: () => api.get('/payments/grouped'),
+  create: (data) => api.post('/payments', data),
+};
+
+// Customers API calls
+export const customersAPI = {
+  getAll: (params) => api.get('/customers', { params }),
+  getById: (id) => api.get(`/customers/${id}`),
+  create: (data) => api.post('/customers', data),
+  update: (id, data) => api.put(`/customers/${id}`, data),
+};
+
 export default api;

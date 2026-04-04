@@ -45,6 +45,9 @@ const authLimiter = rateLimit({
 // — Routes —
 app.use('/api/auth', authLimiter, require('./routes/auth'));
 app.use('/api/pos', authLimiter, require('./routes/pos'));
+app.use('/api/orders', authLimiter, require('./routes/orders'));
+app.use('/api/payments', authLimiter, require('./routes/payments'));
+app.use('/api/customers', authLimiter, require('./routes/customers'));
 
 // Health check
 app.get('/api/health', (req, res) => {

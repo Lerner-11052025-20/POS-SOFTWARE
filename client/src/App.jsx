@@ -3,6 +3,7 @@ import { useAuth } from './context/AuthContext';
 import AuthPage from './pages/auth/AuthPage';
 import Dashboard from './pages/Dashboard';
 import POSConfigurationPage from './pages/pos/POSConfigurationPage';
+import OperationsManagementPage from './pages/pos/OperationsManagementPage';
 import UnauthorizedPage from './pages/UnauthorizedPage';
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -63,6 +64,16 @@ export default function App() {
         element={
           <ProtectedRoute allowedRoles={['manager']}>
             <POSConfigurationPage />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Operations — Orders, Payments, Customers */}
+      <Route
+        path="/operations"
+        element={
+          <ProtectedRoute allowedRoles={['manager', 'cashier']}>
+            <OperationsManagementPage />
           </ProtectedRoute>
         }
       />
