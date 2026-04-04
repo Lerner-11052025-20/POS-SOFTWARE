@@ -33,7 +33,7 @@ app.use(cookieParser());
 // Rate limiting for auth routes
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 50, // 50 requests per window
+  max: 5000, // 50 requests per window
   message: {
     success: false,
     message: 'Too many requests. Please try again in 15 minutes.',
