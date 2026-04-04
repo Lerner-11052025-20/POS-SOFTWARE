@@ -71,69 +71,62 @@ function TableCard({ table, isSelected, onSelect, disabled }) {
   const status = table.status || 'available';
   const meta = STATUS_MAP[status] || STATUS_MAP.available;
   const isAvailable = status === 'available';
-  const StatusIcon = meta.icon;
-
-  const baseClasses = 'relative flex flex-col items-center justify-center rounded-2xl border-2 transition-all duration-300 cursor-pointer group overflow-hidden';
 
   let stateClasses;
   if (isSelected) {
-    stateClasses = 'bg-cafe-50 border-cafe-500 shadow-card-hover ring-2 ring-cafe-200 -translate-y-1';
+    stateClasses = 'border-cafe-500 ring-4 ring-cafe-50 shadow-md scale-105';
   } else if (isAvailable) {
-    stateClasses = 'bg-white border-stone-100 hover:border-cafe-300 hover:shadow-card-hover hover:-translate-y-0.5';
+    stateClasses = 'border-emerald-200 shadow-sm hover:shadow-md hover:-translate-y-0.5';
   } else {
-    stateClasses = 'bg-stone-50/70 border-stone-100 opacity-60 cursor-not-allowed';
+    stateClasses = 'border-stone-100 opacity-60 cursor-not-allowed bg-stone-50/50';
   }
 
   return (
     <button
       onClick={() => !disabled && isAvailable && onSelect(table)}
       disabled={disabled || !isAvailable}
-      className={`${baseClasses} ${stateClasses} aspect-square p-4`}
+      className={`relative w-full flex flex-col items-center justify-center rounded-[20px] border transition-all duration-300 py-6 px-2 bg-white ${stateClasses}`}
       title={isAvailable ? `Select Table ${table.tableNumber}` : `Table ${table.tableNumber} — ${meta.label}`}
     >
-      {/* Status Indicator Dot */}
-      <div className="absolute top-3 right-3 flex items-center gap-1">
-        <div className={`w-2 h-2 rounded-full ${
-          isSelected ? 'bg-cafe-500' :
-          status === 'available' ? 'bg-emerald-500' :
-          status === 'occupied' ? 'bg-stone-300' :
+      {/* Container for Pill and Dot */}
+      <div className="relative inline-flex items-center justify-center mb-4 mt-2">
+        {/* Table Number Pill */}
+        <div className={`px-6 py-2.5 rounded-[100px] font-display font-medium text-2xl tracking-tight transition-colors duration-300 ${
+          isSelected ? 'bg-cafe-500 text-white' :
+          isAvailable ? 'bg-[#F4F4F5] text-stone-800' :
+          'bg-stone-100 text-stone-400'
+        }`}>
+          {table.tableNumber}
+        </div>
+        
+        {/* Floating Top-Right Status Dot */}
+        <div className={`absolute -top-1 -right-4 w-3.5 h-3.5 rounded-full ${
+          isSelected ? 'bg-cafe-700' :
+          status === 'available' ? 'bg-[#66bb6a]' :
+          status === 'occupied' ? 'bg-stone-400' :
           'bg-amber-400'
         }`} />
       </div>
 
-      {/* Table Number */}
-      <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-2.5 transition-colors duration-300 ${
-        isSelected ? 'bg-cafe-500 text-white' :
-        isAvailable ? 'bg-stone-100 text-stone-600 group-hover:bg-cafe-50 group-hover:text-cafe-600' :
-        'bg-stone-100 text-stone-300'
-      }`}>
-        <span className="text-lg font-display font-bold">{table.tableNumber}</span>
-      </div>
-
       {/* Seat Count */}
-      <div className={`flex items-center gap-1 text-xs font-medium transition-colors ${
+      <div className={`flex items-center gap-2 text-[15px] font-medium transition-colors mb-2 ${
         isSelected ? 'text-cafe-700' :
-        isAvailable ? 'text-stone-500 group-hover:text-stone-700' :
-        'text-stone-300'
+        isAvailable ? 'text-stone-500' :
+        'text-stone-400'
       }`}>
-        <Users className="w-3 h-3" />
+        <Users className="w-4 h-4 opacity-80" />
         <span>{table.seatsCount} {table.seatsCount === 1 ? 'seat' : 'seats'}</span>
       </div>
 
       {/* Status Label */}
-      <span className={`mt-1.5 text-xs font-medium ${
-        isSelected ? 'text-cafe-600' :
-        status === 'available' ? 'text-emerald-600' :
+      <span className={`text-[15px] font-medium tracking-wide ${
+        isSelected ? 'text-cafe-600 font-bold' :
+        status === 'available' ? 'text-[#047857]' :
         status === 'occupied' ? 'text-stone-400' :
-        'text-amber-600'
+        'text-amber-500'
       }`}>
         {isSelected ? 'Selected' : meta.label}
       </span>
-
-      {/* Hover Shine */}
-      {isAvailable && !isSelected && (
-        <div className="absolute inset-0 bg-gradient-to-br from-cafe-500/0 to-cafe-500/0 group-hover:from-cafe-500/[0.03] group-hover:to-transparent transition-all duration-500 pointer-events-none" />
-      )}
     </button>
   );
 }

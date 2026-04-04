@@ -83,11 +83,7 @@ export default function Dashboard() {
   };
 
   const handleSelfOrder = () => {
-    if (configs.length > 0) {
-      navigate(`/pos/terminal/${configs[0]._id}`);
-    } else {
-      navigate('/pos/terminal/default');
-    }
+    navigate('/pos/terminal/default');
   };
 
 
