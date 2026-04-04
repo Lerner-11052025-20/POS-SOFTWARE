@@ -6,9 +6,18 @@ const { protect, authorize } = require('../middleware/auth');
 const router = express.Router();
 router.use(protect);
 
-// GET /api/tables — List tables (Manager, Cashier)
-router.get('/', authorize('manager', 'cashier'), async (req, res) => {
+// GET /api/tables — List tables (Manager, Cashier, Customer)
+router.get('/', authorize('manager', 'cashier', 'customer'), async (req, res) => {
   try {
+    // Auto-release stale reservations older than 30 minutes
+    await Table.updateMany(
+      {
+        status: 'reserved',
+        reservedAt: { $lt: new Date(Date.now() - 30 * 60 * 1000) },
+      },
+      { $set: { status: 'available', reservedBy: null, reservedAt: null } }
+    );
+
     const { floor } = req.query;
     const filter = { isActive: true };
     if (floor) filter.floor = floor;
@@ -122,6 +131,81 @@ router.delete('/bulk', authorize('manager'), async (req, res) => {
     await Table.deleteMany({ _id: { $in: ids } });
     res.json({ success: true, message: `${ids.length} table(s) deleted permanently` });
   } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// ─── POST /api/tables/:id/select — Atomic Table Selection ──────────
+router.post('/:id/select', authorize('customer', 'cashier', 'manager'), async (req, res) => {
+  try {
+    // Atomic: only select if status is available (or field doesn't exist yet)
+    const table = await Table.findOneAndUpdate(
+      {
+        _id: req.params.id,
+        isActive: true,
+        $or: [
+          { status: 'available' },
+          { status: { $exists: false } },
+        ],
+      },
+      {
+        $set: {
+          status: 'reserved',
+          reservedBy: req.user._id,
+          reservedAt: new Date(),
+        },
+      },
+      { new: true }
+    );
+
+    if (!table) {
+      const existing = await Table.findById(req.params.id);
+      if (!existing) {
+        return res.status(404).json({ success: false, message: 'Table not found' });
+      }
+      if (!existing.isActive) {
+        return res.status(400).json({ success: false, message: 'This table is currently inactive' });
+      }
+      const label = existing.status === 'reserved' ? 'reserved' : existing.status || 'unavailable';
+      return res.status(409).json({
+        success: false,
+        message: `This table was just taken. It is currently ${label}. Please choose another table.`,
+        currentStatus: existing.status,
+      });
+    }
+
+    res.json({ success: true, table, message: `Table ${table.tableNumber} reserved successfully` });
+  } catch (err) {
+    console.error('Table select error:', err);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// ─── POST /api/tables/:id/release — Release Table Reservation ───────
+router.post('/:id/release', authorize('customer', 'cashier', 'manager'), async (req, res) => {
+  try {
+    const table = await Table.findById(req.params.id);
+    if (!table) {
+      return res.status(404).json({ success: false, message: 'Table not found' });
+    }
+
+    // Only the user who reserved it (or a manager) can release
+    if (
+      table.reservedBy &&
+      table.reservedBy.toString() !== req.user._id.toString() &&
+      req.user.role !== 'manager'
+    ) {
+      return res.status(403).json({ success: false, message: 'Not authorized to release this table' });
+    }
+
+    table.status = 'available';
+    table.reservedBy = null;
+    table.reservedAt = null;
+    await table.save();
+
+    res.json({ success: true, table, message: 'Table released' });
+  } catch (err) {
+    console.error('Table release error:', err);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 });

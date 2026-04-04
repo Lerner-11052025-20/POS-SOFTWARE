@@ -1,6 +1,8 @@
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { LogOut, Coffee, Monitor, LayoutGrid, ChefHat, ShoppingBag, BarChart3, Settings, ClipboardList } from 'lucide-react';
+import { posAPI } from '../services/api';
+import { LogOut, Coffee, Monitor, LayoutGrid, ChefHat, ShoppingBag, BarChart3, Settings, ClipboardList, Terminal, ArrowRight, Table } from 'lucide-react';
 
 const ROLE_FEATURES = {
   cashier: {
@@ -22,7 +24,6 @@ const ROLE_FEATURES = {
     quickActions: [
       { label: 'View Queue', path: '/kitchen', icon: ChefHat, ready: false },
       { label: 'Active Orders', path: '/kitchen', icon: ShoppingBag, ready: false },
-      { label: 'Completed', path: '/kitchen', icon: Settings, ready: false },
     ],
   },
   customer: {
@@ -31,9 +32,9 @@ const ROLE_FEATURES = {
     icon: ShoppingBag,
     color: 'from-emerald-500 to-teal-500',
     quickActions: [
-      { label: 'View Menu', path: '/customer', icon: ShoppingBag, ready: false },
+      { label: 'View Menu', path: '/customer/menu', icon: ShoppingBag, ready: true },
+      { label: 'Self Order', path: '/pos/terminal', icon: Monitor, ready: true },
       { label: 'My Orders', path: '/customer', icon: LayoutGrid, ready: false },
-      { label: 'Self Order', path: '/customer', icon: Monitor, ready: false },
     ],
   },
   manager: {
@@ -52,6 +53,24 @@ const ROLE_FEATURES = {
 export default function Dashboard() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const [configs, setConfigs] = useState([]);
+  const [loadingConfigs, setLoadingConfigs] = useState(true);
+
+  useEffect(() => {
+    const fetchConfigs = async () => {
+      try {
+        const res = await posAPI.getConfigs();
+        if (res.data.success) {
+          setConfigs(res.data.configs);
+        }
+      } catch (err) {
+        console.error('Fetch configs error:', err);
+      } finally {
+        setLoadingConfigs(false);
+      }
+    };
+    fetchConfigs();
+  }, []);
 
   if (!user) return null;
 
@@ -63,9 +82,16 @@ export default function Dashboard() {
     navigate('/login', { replace: true });
   };
 
+  const handleSelfOrder = () => {
+    if (configs.length > 0) {
+      navigate(`/pos/terminal/${configs[0]._id}`);
+    } else {
+      navigate('/pos/terminal/default');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-cream-50">
-      {/* Top Bar */}
       <header className="bg-white/80 backdrop-blur-md border-b border-stone-200/50 sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -82,7 +108,7 @@ export default function Dashboard() {
               <p className="text-sm font-display font-semibold text-stone-800">{user.fullName}</p>
               <p className="text-[11px] text-stone-400 capitalize">{user.role}</p>
             </div>
-            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-cafe-400 to-cafe-600 flex items-center justify-center text-white font-display font-bold text-sm">
+            <div className="w-9 h-9 rounded-2xl bg-stone-100 border border-stone-200 flex items-center justify-center text-stone-800 font-display font-bold text-sm">
               {user.fullName?.charAt(0).toUpperCase()}
             </div>
             <button
@@ -96,9 +122,38 @@ export default function Dashboard() {
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="max-w-6xl mx-auto px-6 py-12">
-        {/* Welcome Card */}
+        {/* Step 1: POS Session Entry Card (for Customers/Staff) */}
+        {user.role === 'customer' && !loadingConfigs && configs.length > 0 && (
+          <div className="bg-white rounded-[2.5rem] p-6 sm:p-8 border border-stone-100 shadow-xl shadow-stone-200/20 mb-10 animate-fade-in-up">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-8">
+              <div className="flex items-center gap-6">
+                <div className="w-16 h-16 bg-stone-900 rounded-[1.5rem] flex items-center justify-center text-cafe-500 shadow-2xl transform rotate-3">
+                  <Terminal className="w-8 h-8" />
+                </div>
+                <div className="flex flex-col">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-lg text-[9px] font-black uppercase tracking-widest">Active Station</span>
+                    <span className="text-stone-300 text-[10px] font-bold">Terminal ID: ODOO-001</span>
+                  </div>
+                  <h3 className="text-2xl font-display font-black text-stone-900 tracking-tight leading-none mb-1">
+                    {configs[0].name}
+                  </h3>
+                  <p className="text-stone-400 text-xs font-semibold tracking-widest uppercase">Start your dine-in experience today.</p>
+                </div>
+              </div>
+
+              <button
+                onClick={handleSelfOrder}
+                className="bg-cafe-600 hover:bg-cafe-500 text-white px-8 py-5 rounded-3xl text-sm font-black uppercase tracking-widest flex items-center gap-3 transition-all hover:shadow-gold hover:shadow-cafe-500/30 group active:scale-95 whitespace-nowrap"
+              >
+                Choose Your Table
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </button>
+            </div>
+          </div>
+        )}
+
         <div className={`relative overflow-hidden rounded-3xl bg-gradient-to-br ${roleData.color} p-8 sm:p-12 text-white mb-8 animate-fade-in-up`}>
           <div className="relative z-10">
             <div className="flex items-center gap-3 mb-4">
@@ -116,19 +171,22 @@ export default function Dashboard() {
               {roleData.description}
             </p>
           </div>
-          {/* Decorative */}
           <div className="absolute -right-8 -bottom-8 w-48 h-48 rounded-full bg-white/10 blur-2xl" />
           <div className="absolute right-12 top-8 w-24 h-24 rounded-full bg-white/5 blur-xl" />
         </div>
 
-        {/* Quick Actions */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8 animate-fade-in-up" style={{ animationDelay: '200ms', animationFillMode: 'backwards' }}>
           {roleData.quickActions.map((action, i) => {
             const ActionIcon = action.icon;
             return (
               <button
                 key={action.label}
-                onClick={() => action.ready && navigate(action.path)}
+                onClick={() => {
+                  if (action.ready) {
+                    if (action.label === 'Self Order') handleSelfOrder();
+                    else navigate(action.path);
+                  }
+                }}
                 className={`p-5 bg-white rounded-2xl shadow-card hover:shadow-card-hover border border-stone-100 text-left transition-all duration-300 hover:-translate-y-0.5 group ${!action.ready ? 'opacity-80' : ''}`}
               >
                 <div className="w-10 h-10 rounded-xl bg-stone-100 group-hover:bg-cafe-50 flex items-center justify-center mb-3 transition-colors">
@@ -141,7 +199,6 @@ export default function Dashboard() {
           })}
         </div>
 
-        {/* User Info Card */}
         <div className="bg-white rounded-2xl shadow-card border border-stone-100 p-6 animate-fade-in-up" style={{ animationDelay: '400ms', animationFillMode: 'backwards' }}>
           <h3 className="font-display font-bold text-stone-800 mb-4">Account Details</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -150,9 +207,6 @@ export default function Dashboard() {
               { label: 'Username', value: `@${user.username}` },
               { label: 'Email', value: user.email },
               { label: 'Role', value: user.role, capitalize: true },
-              ...(user.businessName ? [{ label: 'Business', value: user.businessName }] : []),
-              ...(user.employeeId ? [{ label: 'Employee ID', value: user.employeeId }] : []),
-              ...(user.phone ? [{ label: 'Phone', value: user.phone }] : []),
             ].map(({ label, value, capitalize }) => (
               <div key={label} className="flex flex-col">
                 <span className="text-[10px] text-stone-400 font-semibold uppercase tracking-wider">{label}</span>
@@ -165,3 +219,4 @@ export default function Dashboard() {
     </div>
   );
 }
+

@@ -2,10 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Search, X, Archive, Trash2, Package, Loader2, Edit3, Filter } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { productsAPI, categoriesAPI } from '../../services/api';
-
-function formatCurrency(a) {
-  return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(a || 0);
-}
+import { formatCurrency } from '../../utils/format';
 
 function getCategoryChipStyle(color) {
   if (!color || typeof color !== 'string' || !color.startsWith('#')) {

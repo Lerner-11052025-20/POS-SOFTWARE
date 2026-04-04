@@ -24,6 +24,20 @@ const tableSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    status: {
+      type: String,
+      enum: ['available', 'occupied', 'booked', 'reserved'],
+      default: 'available',
+    },
+    reservedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null,
+    },
+    reservedAt: {
+      type: Date,
+      default: null,
+    },
     // Reference to a linked appointment or service resource (if needed)
     resourceRef: {
       type: String,
@@ -41,5 +55,6 @@ const tableSchema = new mongoose.Schema(
 
 // Ensure a table number is unique per floor
 tableSchema.index({ tableNumber: 1, floor: 1 }, { unique: true });
+tableSchema.index({ status: 1, reservedAt: 1 });
 
 module.exports = mongoose.model('Table', tableSchema);

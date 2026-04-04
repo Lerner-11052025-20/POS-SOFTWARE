@@ -10,8 +10,8 @@ const router = express.Router();
 router.use(protect);
 
 // ─── GET /api/pos/configs ────────────────────────────────────
-// Fetch all POS configurations (manager: all, cashier: active only)
-router.get('/configs', authorize('manager', 'cashier'), async (req, res) => {
+// Fetch all POS configurations (manager: all, cashier/customer: active only)
+router.get('/configs', authorize('manager', 'cashier', 'customer'), async (req, res) => {
   try {
     const filter = req.user.role === 'manager' ? {} : { isActive: true };
     const configs = await POSConfig.find(filter)
@@ -27,12 +27,19 @@ router.get('/configs', authorize('manager', 'cashier'), async (req, res) => {
 });
 
 // ─── GET /api/pos/configs/:id ────────────────────────────────
-// Fetch single POS configuration
-router.get('/configs/:id', authorize('manager', 'cashier'), async (req, res) => {
+// Fetch single POS configuration (Manager, Cashier, Customer)
+router.get('/configs/:id', authorize('manager', 'cashier', 'customer'), async (req, res) => {
   try {
-    const config = await POSConfig.findById(req.params.id)
-      .populate('createdBy', 'fullName username')
-      .populate('currentSessionId');
+    let config;
+    if (req.params.id === 'default') {
+      config = await POSConfig.findOne({ isActive: true })
+        .populate('createdBy', 'fullName username')
+        .populate('currentSessionId');
+    } else {
+      config = await POSConfig.findById(req.params.id)
+        .populate('createdBy', 'fullName username')
+        .populate('currentSessionId');
+    }
 
     if (!config) {
       return res.status(404).json({ success: false, message: 'Terminal not found' });
@@ -40,6 +47,7 @@ router.get('/configs/:id', authorize('manager', 'cashier'), async (req, res) => 
 
     res.json({ success: true, config });
   } catch (err) {
+    console.error('Fetch config error:', err);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 });

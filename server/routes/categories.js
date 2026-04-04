@@ -7,7 +7,7 @@ const router = express.Router();
 router.use(protect);
 
 // GET /api/categories — List all categories
-router.get('/', authorize('manager', 'cashier'), async (req, res) => {
+router.get('/', authorize('manager', 'cashier', 'customer'), async (req, res) => {
   try {
     const filter = { isActive: true };
     const categories = await Category.find(filter).sort({ name: 1 });

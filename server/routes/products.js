@@ -7,12 +7,17 @@ const router = express.Router();
 router.use(protect);
 
 // GET /api/products — List all products
-router.get('/', authorize('manager', 'cashier'), async (req, res) => {
+router.get('/', authorize('manager', 'cashier', 'customer'), async (req, res) => {
   try {
     const { search, category, active } = req.query;
     const filter = {};
 
-    if (active !== 'all') filter.isActive = active !== 'false';
+    // For customers, ONLY show active products
+    if (req.user.role === 'customer') {
+      filter.isActive = true;
+    } else if (active !== 'all') {
+      filter.isActive = active !== 'false';
+    }
     if (category) filter.category = category;
     if (search && search.trim()) {
       const searchEscaped = search.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -32,7 +37,7 @@ router.get('/', authorize('manager', 'cashier'), async (req, res) => {
 });
 
 // GET /api/products/:id — Single product
-router.get('/:id', authorize('manager', 'cashier'), async (req, res) => {
+router.get('/:id', authorize('manager', 'cashier', 'customer'), async (req, res) => {
   try {
     const product = await Product.findById(req.params.id)
       .populate('category', 'name color');

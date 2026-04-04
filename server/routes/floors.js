@@ -7,8 +7,8 @@ const { protect, authorize } = require('../middleware/auth');
 const router = express.Router();
 router.use(protect);
 
-// GET /api/floors — List floors (Manager, Cashier)
-router.get('/', authorize('manager', 'cashier'), async (req, res) => {
+// GET /api/floors — List floors (Manager, Cashier, Customer)
+router.get('/', authorize('manager', 'cashier', 'customer'), async (req, res) => {
   try {
     const { posConfig } = req.query;
     const filter = { isActive: true };

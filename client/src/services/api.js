@@ -113,6 +113,8 @@ export const tablesAPI = {
   update: (id, data) => api.put(`/tables/${id}`, data),
   bulkDuplicate: (ids) => api.post('/tables/bulk/duplicate', { ids }),
   bulkDelete: (ids) => api.delete('/tables/bulk', { data: { ids } }),
+  select: (id) => api.post(`/tables/${id}/select`),
+  release: (id) => api.post(`/tables/${id}/release`),
 };
 
 export default api;
