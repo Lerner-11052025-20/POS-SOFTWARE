@@ -80,4 +80,22 @@ export const customersAPI = {
   update: (id, data) => api.put(`/customers/${id}`, data),
 };
 
+// Products API calls
+export const productsAPI = {
+  getAll: (params) => api.get('/products', { params }),
+  getById: (id) => api.get(`/products/${id}`),
+  create: (data) => api.post('/products', data),
+  update: (id, data) => api.put(`/products/${id}`, data),
+  bulkArchive: (ids) => api.put('/products/bulk/archive', { ids }),
+  bulkDelete: (ids) => api.delete('/products/bulk', { data: { ids } }),
+};
+
+// Categories API calls
+export const categoriesAPI = {
+  getAll: () => api.get('/categories'),
+  create: (data) => api.post('/categories', data),
+  update: (id, data) => api.put(`/categories/${id}`, data),
+  remove: (id) => api.delete(`/categories/${id}`),
+};
+
 export default api;

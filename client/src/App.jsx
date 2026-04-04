@@ -4,6 +4,7 @@ import AuthPage from './pages/auth/AuthPage';
 import Dashboard from './pages/Dashboard';
 import POSConfigurationPage from './pages/pos/POSConfigurationPage';
 import OperationsManagementPage from './pages/pos/OperationsManagementPage';
+import ProductCategoryManagementPage from './pages/pos/ProductCategoryManagementPage';
 import UnauthorizedPage from './pages/UnauthorizedPage';
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -74,6 +75,16 @@ export default function App() {
         element={
           <ProtectedRoute allowedRoles={['manager', 'cashier']}>
             <OperationsManagementPage />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Catalog — Products, Categories */}
+      <Route
+        path="/catalog"
+        element={
+          <ProtectedRoute allowedRoles={['manager', 'cashier']}>
+            <ProductCategoryManagementPage />
           </ProtectedRoute>
         }
       />

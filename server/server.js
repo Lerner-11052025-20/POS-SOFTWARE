@@ -48,6 +48,8 @@ app.use('/api/pos', authLimiter, require('./routes/pos'));
 app.use('/api/orders', authLimiter, require('./routes/orders'));
 app.use('/api/payments', authLimiter, require('./routes/payments'));
 app.use('/api/customers', authLimiter, require('./routes/customers'));
+app.use('/api/products', authLimiter, require('./routes/products'));
+app.use('/api/categories', authLimiter, require('./routes/categories'));
 
 // Health check
 app.get('/api/health', (req, res) => {
