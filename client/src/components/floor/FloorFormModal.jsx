@@ -48,11 +48,11 @@ export default function FloorFormModal({ isOpen, onClose, onSuccess, configId, e
         <div className="p-8">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h3 className="text-2xl font-display font-black text-stone-900 tracking-tight leading-7">
-                {editingFloor ? 'Refine' : 'Architect'} <br/>
+              <h3 className="text-2xl font-display font-bold text-stone-900 tracking-tight leading-7">
+                {editingFloor ? 'Edit' : 'Create'} <br/>
                 <span className="text-cafe-600">Your Floor Plan</span>
               </h3>
-              <p className="text-[10px] text-stone-400 font-bold tracking-widest uppercase mt-2">Dine-In Infrastructure</p>
+              <p className="text-sm font-medium text-stone-400 mt-2">Dine-In Infrastructure</p>
             </div>
             <button onClick={onClose} className="p-2 hover:bg-stone-50 rounded-full transition-colors text-stone-300 hover:text-stone-600">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -63,7 +63,7 @@ export default function FloorFormModal({ isOpen, onClose, onSuccess, configId, e
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <label className="text-[10px] font-black text-stone-500 uppercase tracking-widest ml-1">Floor Name / Label</label>
+              <label className="text-sm font-semibold text-stone-500 ml-1">Floor Name / Label</label>
               <div className="relative group">
                 <input
                   type="text"
@@ -85,7 +85,7 @@ export default function FloorFormModal({ isOpen, onClose, onSuccess, configId, e
             {error && (
               <div className="bg-rose-50 border border-rose-100 p-4 rounded-xl flex items-center gap-3 animate-head-shake">
                 <div className="w-1.5 h-1.5 rounded-full bg-rose-500"></div>
-                <p className="text-rose-600 text-[11px] font-bold tracking-tight">{error}</p>
+                <p className="text-rose-600 text-sm font-medium">{error}</p>
               </div>
             )}
 
@@ -93,16 +93,16 @@ export default function FloorFormModal({ isOpen, onClose, onSuccess, configId, e
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 py-4 px-6 rounded-2xl bg-stone-50 text-stone-500 text-sm font-bold uppercase tracking-widest hover:bg-stone-100 transition-all"
+                className="flex-1 py-4 px-6 rounded-2xl bg-stone-50 text-stone-600 text-sm font-semibold hover:bg-stone-100 transition-all"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-[2] py-4 px-6 rounded-2xl bg-cafe-600 text-white text-sm font-black uppercase tracking-widest shadow-gold hover:bg-cafe-700 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 group"
+                className="flex-[2] py-4 px-6 rounded-2xl bg-cafe-600 text-white text-sm font-semibold shadow-gold hover:bg-cafe-700 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 group"
               >
-                {loading ? 'Committing...' : (editingFloor ? 'Update Entity' : 'Finalize Floor')}
+                {loading ? 'Saving...' : (editingFloor ? 'Save Changes' : 'Create Floor')}
                 {!loading && (
                    <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M13 7l5 5m0 0l-5 5m5-5H6" />
