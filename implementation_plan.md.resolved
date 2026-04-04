@@ -1,0 +1,409 @@
+# 🏆 ODOO POS CAFE — 24-HOUR BATTLE PLAN
+## Hackathon Final Round | MERN Stack | 103 Teams → TOP 5 TARGET
+
+---
+
+## 📊 RAPID PROBLEM ANALYSIS
+
+### What Real Problem It Solves
+Restaurants lose **15-20% revenue** due to order miscommunication, slow billing, and lack of real-time coordination between front-of-house and kitchen. This POS system eliminates all friction points in the restaurant workflow.
+
+### Who The Users Are
+| Role | Pain Point | Our Solution |
+|------|-----------|--------------|
+| **POS Staff/Admin** | Manual order tracking, slow billing | One-tap ordering, instant payment processing |
+| **Kitchen Staff** | Missed orders, no priority visibility | Real-time kitchen display with stage tracking |
+| **Customers** | No transparency on order status | Live customer display showing order progress |
+| **Restaurant Owner** | No business insights | Real-time dashboard with sales analytics |
+
+### What Judges Actually Expect
+1. ✅ **Complete E2E working flow** — not mockups, working system
+2. ✅ **Real business logic** — order lifecycle, payments, sessions
+3. ✅ **Innovation** — real-time sync, QR payments, self-ordering
+4. ✅ **Production-quality UI** — premium, polished, dark/light mode
+5. ✅ **Technical depth** — proper MERN architecture, WebSocket, state management
+
+---
+
+## 🏗️ TECH ARCHITECTURE
+
+```
+┌─────────────────────────────────────────────────┐
+│                   FRONTEND (React + Vite)        │
+│  ┌──────────┐ ┌──────────┐ ┌──────────────────┐ │
+│  │ POS      │ │ Kitchen  │ │ Customer Display │ │
+│  │ Terminal │ │ Display  │ │                  │ │
+│  └──────────┘ └──────────┘ └──────────────────┘ │
+│  ┌──────────┐ ┌──────────┐ ┌──────────────────┐ │
+│  │ Admin    │ │ Auth     │ │ Dashboard &      │ │
+│  │ Backend  │ │ Pages    │ │ Reports          │ │
+│  └──────────┘ └──────────┘ └──────────────────┘ │
+└─────────────────┬───────────────────────────────┘
+                  │ REST API + WebSocket (Socket.io)
+┌─────────────────┴───────────────────────────────┐
+│              BACKEND (Node.js + Express)         │
+│  ┌──────┐ ┌──────┐ ┌────────┐ ┌───────────────┐ │
+│  │ Auth │ │ CRUD │ │ Orders │ │ WebSocket Hub │ │
+│  │ JWT  │ │ APIs │ │ Logic  │ │ Real-time     │ │
+│  └──────┘ └──────┘ └────────┘ └───────────────┘ │
+└─────────────────┬───────────────────────────────┘
+                  │
+┌─────────────────┴───────────────────────────────┐
+│              DATABASE (MongoDB + Mongoose)        │
+│  Users | Products | Orders | Sessions | Floors   │
+│  Tables | PaymentMethods | Payments              │
+└─────────────────────────────────────────────────┘
+```
+
+### Tech Stack Details
+| Layer | Technology | Why |
+|-------|-----------|-----|
+| **Frontend** | React 18 + Vite | Fast dev, HMR, modern React |
+| **Routing** | React Router v6 | Client-side routing |
+| **State** | React Context + useReducer | Lightweight, no Redux needed |
+| **Styling** | Vanilla CSS + CSS Variables | Dark/Light mode, premium design |
+| **Real-time** | Socket.io | Kitchen display, customer display sync |
+| **Backend** | Express.js | REST APIs, middleware |
+| **Auth** | JWT + bcrypt | Secure authentication |
+| **Database** | MongoDB + Mongoose | Flexible schema, fast queries |
+| **QR Code** | qrcode library | UPI QR generation |
+| **Charts** | Chart.js / Recharts | Dashboard reporting |
+| **Export** | jsPDF + xlsx | PDF/XLS report export |
+
+---
+
+## 📁 PROJECT STRUCTURE
+
+```
+odoo-pos-cafe/
+├── client/                    # React Frontend (Vite)
+│   ├── public/
+│   ├── src/
+│   │   ├── assets/            # Images, icons, fonts
+│   │   ├── components/        # Reusable UI components
+│   │   │   ├── common/        # Button, Modal, Toggle, Card
+│   │   │   ├── layout/        # Sidebar, TopBar, ThemeToggle
+│   │   │   └── ui/            # Tables, Forms, Charts
+│   │   ├── context/           # Auth, Theme, POS contexts
+│   │   ├── pages/
+│   │   │   ├── auth/          # Login, Signup
+│   │   │   ├── backend/       # Admin config pages
+│   │   │   │   ├── Products.jsx
+│   │   │   │   ├── PaymentMethods.jsx
+│   │   │   │   ├── FloorPlan.jsx
+│   │   │   │   ├── POSTerminal.jsx
+│   │   │   │   └── SelfOrdering.jsx
+│   │   │   ├── pos/           # POS terminal pages
+│   │   │   │   ├── FloorView.jsx
+│   │   │   │   ├── OrderScreen.jsx
+│   │   │   │   └── PaymentScreen.jsx
+│   │   │   ├── kitchen/       # Kitchen display
+│   │   │   ├── customer/      # Customer display
+│   │   │   └── dashboard/     # Reports & analytics
+│   │   ├── hooks/             # Custom hooks
+│   │   ├── services/          # API service functions
+│   │   ├── utils/             # Helpers, formatters
+│   │   ├── App.jsx
+│   │   ├── App.css
+│   │   └── main.jsx
+│   ├── index.html
+│   └── vite.config.js
+│
+├── server/                    # Node.js Backend
+│   ├── config/
+│   │   └── db.js              # MongoDB connection
+│   ├── middleware/
+│   │   └── auth.js            # JWT middleware
+│   ├── models/
+│   │   ├── User.js
+│   │   ├── Product.js
+│   │   ├── Order.js
+│   │   ├── Session.js
+│   │   ├── Floor.js
+│   │   ├── Table.js
+│   │   └── PaymentMethod.js
+│   ├── routes/
+│   │   ├── auth.js
+│   │   ├── products.js
+│   │   ├── orders.js
+│   │   ├── sessions.js
+│   │   ├── floors.js
+│   │   ├── tables.js
+│   │   ├── payments.js
+│   │   └── reports.js
+│   ├── socket/
+│   │   └── index.js           # Socket.io event handlers
+│   └── server.js              # Entry point
+│
+├── package.json
+└── README.md
+```
+
+---
+
+## 🗄️ DATABASE SCHEMA
+
+### Users Collection
+```javascript
+{
+  name: String,
+  email: String (unique),
+  password: String (hashed),
+  role: String ('admin' | 'staff'),
+  createdAt: Date
+}
+```
+
+### Products Collection
+```javascript
+{
+  name: String,
+  category: String ('Pizza' | 'Pasta' | 'Burger' | 'Coffee' | 'Beverages'),
+  price: Number,
+  unit: String,
+  tax: Number (percentage),
+  description: String,
+  image: String,
+  variants: [{
+    attribute: String,    // e.g., "Pack"
+    values: [{
+      label: String,      // e.g., "6 items"
+      extraPrice: Number  //  e.g., 50
+    }]
+  }],
+  isActive: Boolean,
+  sendToKitchen: Boolean,
+  createdAt: Date
+}
+```
+
+### Floors Collection
+```javascript
+{
+  name: String,           // e.g., "Ground Floor"
+  tables: [{
+    tableNumber: Number,
+    seats: Number,
+    isActive: Boolean,
+    status: String ('available' | 'occupied' | 'reserved'),
+    currentOrder: ObjectId (ref: Order)
+  }],
+  createdAt: Date
+}
+```
+
+### Sessions Collection
+```javascript
+{
+  user: ObjectId (ref: User),
+  openedAt: Date,
+  closedAt: Date,
+  status: String ('open' | 'closed'),
+  totalSales: Number,
+  orderCount: Number,
+  closingSaleAmount: Number
+}
+```
+
+### Orders Collection
+```javascript
+{
+  orderNumber: String (auto-generated),
+  session: ObjectId (ref: Session),
+  table: { floor: ObjectId, tableNumber: Number },
+  items: [{
+    product: ObjectId (ref: Product),
+    name: String,
+    quantity: Number,
+    price: Number,
+    variant: String,
+    notes: String
+  }],
+  subtotal: Number,
+  tax: Number,
+  total: Number,
+  status: String ('draft' | 'sent' | 'preparing' | 'completed' | 'paid'),
+  kitchenStatus: String ('to_cook' | 'preparing' | 'completed'),
+  paymentMethod: String ('cash' | 'digital' | 'upi'),
+  paymentStatus: String ('unpaid' | 'paid'),
+  selfOrder: Boolean,
+  selfOrderToken: String,
+  createdBy: ObjectId (ref: User),
+  createdAt: Date,
+  paidAt: Date
+}
+```
+
+### PaymentMethods Collection
+```javascript
+{
+  user: ObjectId (ref: User),
+  cash: { enabled: Boolean },
+  digital: { enabled: Boolean },
+  upi: { enabled: Boolean, upiId: String }
+}
+```
+
+---
+
+## 🔗 API ROUTES
+
+| Method | Route | Purpose |
+|--------|-------|---------|
+| POST | `/api/auth/signup` | Register new user |
+| POST | `/api/auth/login` | Login user |
+| GET | `/api/auth/me` | Get current user |
+| GET/POST/PUT/DELETE | `/api/products` | Product CRUD |
+| GET/POST/PUT | `/api/floors` | Floor & Table management |
+| POST | `/api/sessions/open` | Open POS session |
+| POST | `/api/sessions/close` | Close POS session |
+| GET | `/api/sessions` | List sessions |
+| POST | `/api/orders` | Create order |
+| PUT | `/api/orders/:id` | Update order |
+| PUT | `/api/orders/:id/send-kitchen` | Send to kitchen |
+| PUT | `/api/orders/:id/kitchen-status` | Update kitchen status |
+| PUT | `/api/orders/:id/pay` | Process payment |
+| GET/PUT | `/api/payment-methods` | Payment config |
+| GET | `/api/reports/sales` | Sales reports |
+| GET | `/api/reports/sessions` | Session reports |
+| GET | `/api/reports/products` | Product reports |
+| POST | `/api/self-order/token` | Generate self-order token |
+| POST | `/api/self-order/place` | Place self-order |
+
+---
+
+## 📄 PAGE LIST & ROUTES
+
+| # | Page | Route | Description |
+|---|------|-------|-------------|
+| 1 | **Login** | `/login` | Email + password login |
+| 2 | **Signup** | `/signup` | New user registration |
+| 3 | **Dashboard** | `/dashboard` | Sales overview + charts + KPIs |
+| 4 | **Products** | `/backend/products` | Product CRUD management |
+| 5 | **Payment Methods** | `/backend/payments` | Enable/disable + UPI config |
+| 6 | **Floor Plan** | `/backend/floors` | Manage floors & tables |
+| 7 | **POS Terminal** | `/backend/pos-terminal` | Session management |
+| 8 | **Self Ordering** | `/backend/self-ordering` | Token generation |
+| 9 | **Floor View (POS)** | `/pos/floor` | Select table to start order |
+| 10 | **Order Screen** | `/pos/order/:tableId` | Product selection + cart |
+| 11 | **Payment Screen** | `/pos/payment/:orderId` | Payment method + process |
+| 12 | **UPI QR Screen** | `/pos/payment/:orderId/upi` | QR code display |
+| 13 | **Kitchen Display** | `/kitchen` | Real-time order board |
+| 14 | **Customer Display** | `/customer/:orderId` | Order & payment status |
+| 15 | **Reports** | `/reports` | Filtered reports + export |
+
+---
+
+## ⏱️ 24-HOUR TIMELINE
+
+### 🔴 PHASE 1: Foundation (Hours 0–2) — NOW
+- [x] Project analysis & planning
+- [ ] Initialize MERN project (Vite + Express)
+- [ ] MongoDB connection setup
+- [ ] Database models (all 6 schemas)
+- [ ] JWT auth middleware
+- [ ] Auth routes (signup/login)
+- [ ] Base CSS design system (dark/light mode variables)
+
+### 🟠 PHASE 2: Backend APIs (Hours 2–5)
+- [ ] Product CRUD routes
+- [ ] Floor & Table routes
+- [ ] Session management routes
+- [ ] Order management routes
+- [ ] Payment processing routes
+- [ ] Socket.io setup for real-time
+- [ ] Report/dashboard data routes
+
+### 🟡 PHASE 3: Auth + Backend Config UI (Hours 5–8)
+- [ ] Login page (premium design)
+- [ ] Signup page
+- [ ] Admin layout (sidebar + topbar)
+- [ ] Product management page
+- [ ] Payment methods config page
+- [ ] Floor plan management page
+- [ ] POS terminal / session page
+
+### 🟢 PHASE 4: POS Terminal UI (Hours 8–13) — THE HEART
+- [ ] Floor View (table selection grid)
+- [ ] Order Screen (product grid + cart sidebar)
+- [ ] Payment Screen (method selection)
+- [ ] UPI QR generation + confirmation flow
+- [ ] Cash + Digital payment flows
+- [ ] Complete order lifecycle
+
+### 🔵 PHASE 5: Kitchen + Customer Display (Hours 13–17)
+- [ ] Kitchen Display with 3 columns (To Cook → Preparing → Completed)
+- [ ] Real-time ticket updates via Socket.io
+- [ ] Click-to-advance order stages
+- [ ] Item-level strike-through
+- [ ] Customer Display showing order + payment status
+
+### 🟣 PHASE 6: Dashboard & Reports (Hours 17–20)
+- [ ] Sales dashboard with charts
+- [ ] KPI cards (total sales, orders, avg ticket, top products)
+- [ ] Report filters (period, session, responsible, product)
+- [ ] PDF export
+- [ ] XLS export
+
+### ⚪ PHASE 7: Polish & Innovation (Hours 20–24)
+- [ ] Self-ordering token system
+- [ ] Dark/Light mode toggle with smooth transitions
+- [ ] Micro-animations & hover effects
+- [ ] Responsive design check
+- [ ] Demo data seeding
+- [ ] Final testing of complete E2E flow
+- [ ] README documentation
+
+---
+
+## 🌟 INNOVATION DIFFERENTIATORS (What Makes Us WIN)
+
+### vs Other 102 Teams:
+1. **Real-time Kitchen Sync** — Socket.io powered, not just CRUD
+2. **Live Customer Display** — separate URL, real-time updates
+3. **UPI QR Generation** — actual QR code from UPI ID, not fake
+4. **Self-Ordering Token** — mobile ordering without an app
+5. **3-Stage Kitchen Board** — Kanban-style (To Cook → Preparing → Completed)
+6. **Premium Dark/Light Mode** — not just color swap, full design system
+7. **Export Reports** — PDF & XLS, production-ready
+8. **Session-based POS** — proper POS session lifecycle
+9. **Table Status Sync** — occupied/available/reserved in real-time
+10. **Order Number System** — auto-generated, tracked across lifecycle
+
+---
+
+## 🎨 DESIGN SYSTEM PREVIEW
+
+### Color Palette
+```css
+/* Light Mode */
+--primary: #6C5CE7;       /* Royal Purple */
+--primary-light: #A29BFE;
+--accent: #00B894;        /* Emerald Green */
+--accent-warm: #FDCB6E;   /* Golden Yellow */
+--danger: #FF6B6B;        /* Coral Red */
+--bg-primary: #F8F9FE;
+--bg-card: #FFFFFF;
+--text-primary: #2D3436;
+
+/* Dark Mode */
+--primary: #A29BFE;
+--bg-primary: #0F0F1A;
+--bg-card: #1A1A2E;
+--text-primary: #E8E8F0;
+```
+
+### Typography
+- **Headings**: Inter (700 weight)
+- **Body**: Inter (400 weight)
+- **Monospace**: JetBrains Mono (for numbers/prices)
+
+---
+
+> [!IMPORTANT]
+> **PRIORITY ORDER**: Auth → Backend APIs → POS Flow → Kitchen Display → Dashboard
+> The POS ordering + payment flow is the **HERO FEATURE** that judges will test first.
+
+---
+
+**Ready to execute? Let's START Phase 1 NOW! 🚀**
