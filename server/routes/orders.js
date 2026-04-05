@@ -49,7 +49,7 @@ router.get('/:id', authorize('manager', 'cashier', 'kitchen', 'customer'), async
 // POST /api/orders — Create order
 router.post('/', authorize('manager', 'cashier', 'customer'), async (req, res) => {
   try {
-    const { customerName, customer, sessionName, session, lines, paymentMethod, table, floor, notes } = req.body;
+    const { customerName, customer, sessionName, session, lines, paymentMethod, table, floor, notes, sendToKitchen } = req.body;
     const order = await Order.create({
       customerName: customerName || 'Walk-in Customer',
       customer: customer || null,
@@ -60,6 +60,8 @@ router.post('/', authorize('manager', 'cashier', 'customer'), async (req, res) =
       table: table || null,
       floor: floor || null,
       notes: notes || '',
+      status: sendToKitchen ? 'confirmed' : 'draft',
+      sentToKitchen: sendToKitchen || false,
       createdBy: req.user._id,
     });
 

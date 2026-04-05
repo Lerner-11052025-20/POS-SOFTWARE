@@ -106,6 +106,18 @@ export const floorsAPI = {
   remove: (id) => api.delete(`/floors/${id}`),
 };
 
+// Kitchen API calls
+export const kitchenAPI = {
+  getOrders: (params) => api.get('/kitchen/orders', { params }),
+  getHistory: () => api.get('/kitchen/orders/history'),
+  getFilters: () => api.get('/kitchen/orders/filters'),
+  prepareItem: (orderId, itemId, isPrepared) =>
+    api.patch(`/kitchen/orders/${orderId}/items/${itemId}/prepare`, { isPrepared }),
+  updateStage: (orderId, stage) =>
+    api.patch(`/kitchen/orders/${orderId}/stage`, { stage }),
+  getProgress: (orderId) => api.get(`/kitchen/orders/${orderId}/progress`),
+};
+
 // Tables API calls
 export const tablesAPI = {
   getAll: (params) => api.get('/tables', { params }),

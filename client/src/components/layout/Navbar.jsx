@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { LogOut, Coffee } from 'lucide-react';
+import { LogOut, Coffee, ChefHat } from 'lucide-react';
 
 export default function Navbar({ title = 'Odoo POS Cafe', subtitle = '' }) {
   const { user, logout } = useAuth();
@@ -60,6 +60,7 @@ export default function Navbar({ title = 'Odoo POS Cafe', subtitle = '' }) {
             <NavItem to="/pos/config" label="Config" />
             <NavItem to="/operations" label="Operations" />
             <NavItem to="/catalog" label="Catalog" />
+            <NavItem to="/kitchen" label="Kitchen" />
             <NavItem to={user.role === 'customer' ? '/pos/terminal/default' : '/pos/floor'} label="Floor Plan" />
           </nav>
         </div>

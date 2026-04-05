@@ -4,6 +4,7 @@ const Order = require('../models/Order');
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
 const { protect, authorize } = require('../middleware/auth');
+const { emitOrderUpdate } = require('../utils/socket');
 
 const router = express.Router();
 router.use(protect);
@@ -74,6 +75,30 @@ router.post('/', authorize('manager', 'cashier'), async (req, res) => {
       processedBy: req.user._id,
     });
 
+    // After payment, send the linked order to kitchen
+    if (order) {
+      const linkedOrder = await Order.findById(order);
+      if (linkedOrder && !linkedOrder.sentToKitchen) {
+        linkedOrder.sentToKitchen = true;
+        if (linkedOrder.status === 'draft') {
+          linkedOrder.status = 'confirmed';
+        }
+        await linkedOrder.save();
+
+        const populated = await Order.findById(linkedOrder._id)
+          .populate('customer', 'name email phone')
+          .populate('createdBy', 'fullName')
+          .populate('table', 'tableNumber')
+          .populate('floor', 'name');
+
+        emitOrderUpdate(linkedOrder._id, {
+          status: 'confirmed',
+          message: 'Order sent to kitchen',
+          order: populated,
+        });
+      }
+    }
+
     res.status(201).json({ success: true, payment });
   } catch (err) {
     console.error('Create payment error:', err);
@@ -132,12 +157,29 @@ router.post('/razorpay/verify', async (req, res) => {
     if (razorpay_signature === expectedSign) {
       // Signature is legit
       
-      // Update order status if orderId provided
+      // Update order status and send to kitchen if orderId provided
       if (orderId) {
-        await Order.findByIdAndUpdate(orderId, {
-          paymentStatus: 'Paid',
-          paymentMethod: 'razorpay'
-        });
+        const linkedOrder = await Order.findById(orderId);
+        if (linkedOrder) {
+          linkedOrder.paymentMethod = 'razorpay';
+          linkedOrder.sentToKitchen = true;
+          if (linkedOrder.status === 'draft') {
+            linkedOrder.status = 'confirmed';
+          }
+          await linkedOrder.save();
+
+          const populated = await Order.findById(linkedOrder._id)
+            .populate('customer', 'name email phone')
+            .populate('createdBy', 'fullName')
+            .populate('table', 'tableNumber')
+            .populate('floor', 'name');
+
+          emitOrderUpdate(linkedOrder._id, {
+            status: 'confirmed',
+            message: 'Order sent to kitchen',
+            order: populated,
+          });
+        }
       }
 
       // Create Payment Record

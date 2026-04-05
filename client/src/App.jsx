@@ -10,6 +10,7 @@ import POSTerminalFloorViewPage from './pages/pos/POSTerminalFloorViewPage';
 import CustomerMenuPage from './pages/customer/CustomerMenuPage';
 import OrderProgressPage from './pages/customer/OrderProgressPage';
 import CustomerDisplayPage from './pages/customer/CustomerDisplayPage';
+import KitchenDisplayPage from './pages/pos/KitchenDisplayPage';
 import UnauthorizedPage from './pages/UnauthorizedPage';
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -67,6 +68,15 @@ export default function App() {
         element={
           <ProtectedRoute allowedRoles={['manager']}>
             <POSConfigurationPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/kitchen"
+        element={
+          <ProtectedRoute allowedRoles={['manager', 'cashier', 'kitchen']}>
+            <KitchenDisplayPage />
           </ProtectedRoute>
         }
       />

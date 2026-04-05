@@ -55,6 +55,9 @@ const orderSchema = new mongoose.Schema(
     total: { type: Number, default: 0 },
     paymentMethod: { type: String, default: '' },
     isArchived: { type: Boolean, default: false },
+    sentToKitchen: { type: Boolean, default: false },
+    kitchenStartedAt: { type: Date, default: null },
+    kitchenCompletedAt: { type: Date, default: null },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
@@ -68,6 +71,7 @@ orderSchema.index({ status: 1 });
 orderSchema.index({ createdAt: -1 });
 orderSchema.index({ customer: 1 });
 orderSchema.index({ isArchived: 1 });
+orderSchema.index({ sentToKitchen: 1, status: 1 });
 
 // Auto-generate order number
 orderSchema.pre('validate', async function (next) {
