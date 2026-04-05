@@ -1,4 +1,5 @@
 const express = require('express');
+const crypto = require('crypto');
 const { body, validationResult } = require('express-validator');
 const Table = require('../models/Table');
 const { protect, authorize } = require('../middleware/auth');
@@ -177,6 +178,24 @@ router.post('/:id/select', authorize('customer', 'cashier', 'manager'), async (r
     res.json({ success: true, table, message: `Table ${table.tableNumber} reserved successfully` });
   } catch (err) {
     console.error('Table select error:', err);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// ─── POST /api/tables/:id/generate-qr — Generate QR Token ───────
+router.post('/:id/generate-qr', authorize('manager', 'cashier'), async (req, res) => {
+  try {
+    const table = await Table.findById(req.params.id);
+    if (!table) return res.status(404).json({ success: false, message: 'Table not found' });
+
+    if (!table.qrToken) {
+      table.qrToken = crypto.randomBytes(16).toString('hex');
+      await table.save();
+    }
+
+    res.json({ success: true, qrToken: table.qrToken, table });
+  } catch (err) {
+    console.error('Generate QR error:', err);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 });

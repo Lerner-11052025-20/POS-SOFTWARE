@@ -58,10 +58,12 @@ const orderSchema = new mongoose.Schema(
     sentToKitchen: { type: Boolean, default: false },
     kitchenStartedAt: { type: Date, default: null },
     kitchenCompletedAt: { type: Date, default: null },
+    tableName: { type: String, default: '' },
+    isPublicOrder: { type: Boolean, default: false },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
-      required: true,
+      default: null,
     },
   },
   { timestamps: true }

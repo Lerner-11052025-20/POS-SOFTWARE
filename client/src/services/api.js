@@ -127,6 +127,18 @@ export const tablesAPI = {
   bulkDelete: (ids) => api.delete('/tables/bulk', { data: { ids } }),
   select: (id) => api.post(`/tables/${id}/select`),
   release: (id) => api.post(`/tables/${id}/release`),
+  generateQR: (id) => api.post(`/tables/${id}/generate-qr`),
+};
+
+// Public API calls (no auth required)
+export const publicAPI = {
+  resolveTable: (token) => api.get(`/public/table/${token}`),
+  getMenu: (params) => api.get('/public/menu', { params }),
+  createOrder: (token, data) => api.post(`/public/table/${token}/order`, data),
+  createRazorpayOrder: (data) => api.post('/public/razorpay/create-order', data),
+  verifyRazorpayPayment: (data) => api.post('/public/razorpay/verify', data),
+  getOrderStatus: (orderId) => api.get(`/public/orders/${orderId}/status`),
+  getTableOrders: (token) => api.get(`/public/table/${token}/orders`),
 };
 
 export default api;

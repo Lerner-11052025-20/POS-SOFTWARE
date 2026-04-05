@@ -44,6 +44,12 @@ const tableSchema = new mongoose.Schema(
       trim: true,
       default: '',
     },
+    qrToken: {
+      type: String,
+      unique: true,
+      sparse: true,
+      default: null,
+    },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',

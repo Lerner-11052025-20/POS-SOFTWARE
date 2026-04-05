@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { tablesAPI } from '../../services/api';
 import TableFormModal from './TableFormModal';
+import TableQRCodeModal from './TableQRCodeModal';
 
 export default function TablesManagementList({ floor, tables, onRefresh, isManager, onEditFloor }) {
   const [selectedIds, setSelectedIds] = useState([]);
   const [showTableModal, setShowTableModal] = useState(false);
+  const [qrModal, setQrModal] = useState({ open: false, table: null, token: null });
 
   const toggleSelect = (id) => {
     setSelectedIds((prev) =>
@@ -42,6 +44,17 @@ export default function TablesManagementList({ floor, tables, onRefresh, isManag
       onRefresh();
     } catch (err) {
       alert('Duplicate failed');
+    }
+  };
+
+  const handleShowQR = async (table) => {
+    try {
+      const res = await tablesAPI.generateQR(table._id);
+      if (res.data.success) {
+        setQrModal({ open: true, table, token: res.data.qrToken });
+      }
+    } catch (err) {
+      console.error('Generate QR error:', err);
     }
   };
 
@@ -165,17 +178,26 @@ export default function TablesManagementList({ floor, tables, onRefresh, isManag
                     </div>
                   </td>
                   <td className="px-8 py-6 text-right">
-                    {isManager && (
+                    <div className="flex items-center justify-end gap-2">
                       <button
-                        onClick={() => handleToggleActive(table)}
-                        className={`text-xs font-semibold transition-all ${table.isActive
-                          ? 'text-stone-400 hover:text-stone-600'
-                          : 'text-emerald-600 hover:text-emerald-700'
-                          }`}
+                        onClick={() => handleShowQR(table)}
+                        className="px-3 py-1.5 text-xs font-semibold text-cafe-600 hover:bg-cafe-50 rounded-lg transition-all border border-cafe-100"
+                        title="Show QR Code"
                       >
-                        {table.isActive ? 'Disable Unit' : 'Restore Asset'}
+                        QR Code
                       </button>
-                    )}
+                      {isManager && (
+                        <button
+                          onClick={() => handleToggleActive(table)}
+                          className={`text-xs font-semibold transition-all ${table.isActive
+                            ? 'text-stone-400 hover:text-stone-600'
+                            : 'text-emerald-600 hover:text-emerald-700'
+                            }`}
+                        >
+                          {table.isActive ? 'Disable Unit' : 'Restore Asset'}
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))
@@ -192,6 +214,13 @@ export default function TablesManagementList({ floor, tables, onRefresh, isManag
           onRefresh();
         }}
         floorId={floor._id}
+      />
+
+      <TableQRCodeModal
+        isOpen={qrModal.open}
+        onClose={() => setQrModal({ open: false, table: null, token: null })}
+        table={qrModal.table}
+        qrToken={qrModal.token}
       />
     </div>
   );

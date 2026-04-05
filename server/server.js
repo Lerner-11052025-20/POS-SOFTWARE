@@ -51,6 +51,7 @@ app.use('/api/categories', authLimiter, require('./routes/categories'));
 app.use('/api/floors', authLimiter, require('./routes/floors'));
 app.use('/api/tables', authLimiter, require('./routes/tables'));
 app.use('/api/kitchen', authLimiter, require('./routes/kitchen'));
+app.use('/api/public', authLimiter, require('./routes/public'));
 
 app.get('/api/health', (req, res) => {
   res.json({

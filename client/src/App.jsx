@@ -14,6 +14,14 @@ import KitchenDisplayPage from './pages/pos/KitchenDisplayPage';
 import UnauthorizedPage from './pages/UnauthorizedPage';
 import ProtectedRoute from './components/ProtectedRoute';
 
+// Public QR Ordering Pages (no auth required)
+import MobileTableLandingPage from './pages/public/MobileTableLandingPage';
+import MobileMenuPage from './pages/public/MobileMenuPage';
+import MobileCheckoutPage from './pages/public/MobileCheckoutPage';
+import MobilePaymentSuccessPage from './pages/public/MobilePaymentSuccessPage';
+import MobileOrderTrackingPage from './pages/public/MobileOrderTrackingPage';
+import MobileOrderHistoryPage from './pages/public/MobileOrderHistoryPage';
+
 export default function App() {
   const { isAuthenticated, loading } = useAuth();
 
@@ -179,6 +187,14 @@ export default function App() {
           </ProtectedRoute>
         }
       />
+
+      {/* ═══ Public QR Table Ordering Routes (no auth) ═══ */}
+      <Route path="/scan/:token" element={<MobileTableLandingPage />} />
+      <Route path="/order/:token" element={<MobileMenuPage />} />
+      <Route path="/order/:token/checkout" element={<MobileCheckoutPage />} />
+      <Route path="/order/:token/success/:orderId" element={<MobilePaymentSuccessPage />} />
+      <Route path="/order/:token/track/:orderId" element={<MobileOrderTrackingPage />} />
+      <Route path="/order/:token/history" element={<MobileOrderHistoryPage />} />
 
       <Route path="/" element={<Navigate to={isAuthenticated ? '/dashboard' : '/login'} replace />} />
       <Route path="*" element={<Navigate to="/" replace />} />

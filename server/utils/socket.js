@@ -24,6 +24,11 @@ const init = (server) => {
       console.log(`Socket ${socket.id} joined KITCHEN room`);
     });
 
+    socket.on('join_table_room', (token) => {
+      socket.join(`table_${token}`);
+      console.log(`Socket ${socket.id} joined TABLE room: table_${token}`);
+    });
+
     socket.on('disconnect', () => {
       console.log('Client disconnected:', socket.id);
     });
