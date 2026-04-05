@@ -9,7 +9,7 @@ const router = express.Router();
 router.use(protect);
 
 // GET /api/payments — List all payments
-router.get('/', authorize('manager', 'cashier'), async (req, res) => {
+router.get('/', authorize('manager', 'cashier', 'kitchen', 'customer'), async (req, res) => {
   try {
     const payments = await Payment.find()
       .populate('order', 'orderNumber total status')
@@ -24,7 +24,7 @@ router.get('/', authorize('manager', 'cashier'), async (req, res) => {
 });
 
 // GET /api/payments/grouped — Grouped by payment method
-router.get('/grouped', authorize('manager', 'cashier'), async (req, res) => {
+router.get('/grouped', authorize('manager', 'cashier', 'kitchen', 'customer'), async (req, res) => {
   try {
     const grouped = await Payment.aggregate([
       {

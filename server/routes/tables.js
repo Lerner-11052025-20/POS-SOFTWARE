@@ -6,8 +6,8 @@ const { protect, authorize } = require('../middleware/auth');
 const router = express.Router();
 router.use(protect);
 
-// GET /api/tables — List tables (Manager, Cashier, Customer)
-router.get('/', authorize('manager', 'cashier', 'customer'), async (req, res) => {
+// GET /api/tables — List tables (Manager, Cashier, Kitchen, Customer)
+router.get('/', authorize('manager', 'cashier', 'kitchen', 'customer'), async (req, res) => {
   try {
     // Auto-release stale reservations older than 30 minutes
     await Table.updateMany(

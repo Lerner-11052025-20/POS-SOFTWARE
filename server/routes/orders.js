@@ -7,7 +7,7 @@ const router = express.Router();
 router.use(protect);
 
 // GET /api/orders — List all orders
-router.get('/', authorize('manager', 'cashier', 'kitchen'), async (req, res) => {
+router.get('/', authorize('manager', 'cashier', 'kitchen', 'customer'), async (req, res) => {
   try {
     const { status, archived } = req.query;
     const filter = {};
@@ -18,8 +18,10 @@ router.get('/', authorize('manager', 'cashier', 'kitchen'), async (req, res) => 
     const orders = await Order.find(filter)
       .populate('customer', 'name email phone')
       .populate('createdBy', 'fullName')
+      .populate('table', 'tableNumber')
+      .populate('floor', 'name')
       .sort({ createdAt: -1 })
-      .limit(200);
+      .limit(500);
 
     res.json({ success: true, orders });
   } catch (err) {
@@ -29,7 +31,7 @@ router.get('/', authorize('manager', 'cashier', 'kitchen'), async (req, res) => 
 });
 
 // GET /api/orders/:id — Single order detail
-router.get('/:id', authorize('manager', 'cashier', 'kitchen'), async (req, res) => {
+router.get('/:id', authorize('manager', 'cashier', 'kitchen', 'customer'), async (req, res) => {
   try {
     const order = await Order.findById(req.params.id)
       .populate('customer', 'name email phone')
@@ -63,7 +65,9 @@ router.post('/', authorize('manager', 'cashier', 'customer'), async (req, res) =
 
     const populated = await Order.findById(order._id)
       .populate('customer', 'name email phone')
-      .populate('createdBy', 'fullName');
+      .populate('createdBy', 'fullName')
+      .populate('table', 'tableNumber')
+      .populate('floor', 'name');
 
     // Notify listeners about new order (Kitchen)
     emitOrderUpdate(order._id, {
@@ -142,7 +146,8 @@ router.patch('/:id/status', authorize('manager', 'cashier', 'kitchen'), async (r
     emitOrderUpdate(order._id, {
       status,
       message: message || `Order switched to ${status}`,
-      updatedAt: order.updatedAt
+      updatedAt: order.updatedAt,
+      tableNumber: order.table?.tableNumber
     });
 
     res.json({ success: true, order });

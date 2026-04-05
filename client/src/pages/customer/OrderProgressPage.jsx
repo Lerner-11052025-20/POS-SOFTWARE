@@ -56,22 +56,24 @@ export default function OrderProgressPage() {
 
     fetchOrderData();
 
-    if (order?._id || orderId) {
-      const targetId = order?._id || orderId;
+    if (orderId) {
       socket.connect();
-      socket.emit('join_order_room', targetId);
+      socket.emit('join_order_room', orderId);
 
-      socket.on('order_status_updated', (data) => {
-        setCurrentStatus(data.status);
-        setLastUpdate(new Date());
-      });
+      const handleUpdate = (data) => {
+        if (data.status) {
+          setCurrentStatus(data.status);
+          setLastUpdate(new Date());
+        }
+      };
+
+      socket.on('order_status_updated', handleUpdate);
+
+      return () => {
+        socket.off('order_status_updated', handleUpdate);
+      };
     }
-
-    return () => {
-      socket.off('order_status_updated');
-      socket.disconnect();
-    };
-  }, [order, orderId, navigate]);
+  }, [orderId]);
 
   if (loading) {
     return (
@@ -162,15 +164,12 @@ export default function OrderProgressPage() {
 
             {/* Compact Table Info */}
             <div className="bg-espresso-900 rounded-2xl p-5 text-white flex items-center justify-between group overflow-hidden relative">
-               <div className="flex items-center gap-3 relative z-10">
-                  <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
-                    <Hash className="w-4 h-4 text-cafe-400" />
-                  </div>
                   <div>
                     <p className="text-[8px] font-bold text-white/40 uppercase tracking-[0.2em] mb-0.5">Table</p>
-                    <p className="text-sm font-display font-black text-white">#101 ·Asset</p>
+                    <p className="text-sm font-display font-black text-white">
+                      Table {order.table?.tableNumber || '--'}
+                    </p>
                   </div>
-               </div>
                <div className="text-right relative z-10">
                   <p className="text-[8px] font-bold text-white/40 uppercase tracking-[0.2em] mb-0.5">Wait Est.</p>
                   <p className="text-sm font-display font-black text-cafe-400">12-15 <span className="text-[9px] uppercase font-bold text-white font-body">MIN</span></p>
