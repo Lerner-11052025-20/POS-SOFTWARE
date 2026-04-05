@@ -12,6 +12,7 @@ import OrderProgressPage from './pages/customer/OrderProgressPage';
 import CustomerDisplayPage from './pages/customer/CustomerDisplayPage';
 import KitchenDisplayPage from './pages/pos/KitchenDisplayPage';
 import UnauthorizedPage from './pages/UnauthorizedPage';
+import HomePage from './pages/HomePage';
 import ProtectedRoute from './components/ProtectedRoute';
 
 // Public QR Ordering Pages (no auth required)
@@ -196,7 +197,7 @@ export default function App() {
       <Route path="/order/:token/track/:orderId" element={<MobileOrderTrackingPage />} />
       <Route path="/order/:token/history" element={<MobileOrderHistoryPage />} />
 
-      <Route path="/" element={<Navigate to={isAuthenticated ? '/dashboard' : '/login'} replace />} />
+      <Route path="/" element={<HomePage />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

@@ -20,7 +20,14 @@ socketUtils.init(server);
 
 app.use(
   cors({
-    origin: ['http://localhost:8080', 'http://127.0.0.1:8080'],
+    origin: function (origin, callback) {
+      // Allow requests with no origin (mobile apps, curl, etc)
+      if (!origin) return callback(null, true);
+      // Allow localhost and any private network IP on dev ports
+      const allowed = /^http:\/\/(localhost|127\.0\.0\.1|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.).*$/;
+      if (allowed.test(origin)) return callback(null, true);
+      callback(new Error('Not allowed by CORS'));
+    },
     credentials: true,
   })
 );

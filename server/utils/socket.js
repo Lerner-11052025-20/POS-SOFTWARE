@@ -5,7 +5,12 @@ let io;
 const init = (server) => {
   io = new Server(server, {
     cors: {
-      origin: ['http://localhost:8080', 'http://127.0.0.1:8080'],
+      origin: function (origin, callback) {
+        if (!origin) return callback(null, true);
+        const allowed = /^http:\/\/(localhost|127\.0\.0\.1|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.).*$/;
+        if (allowed.test(origin)) return callback(null, true);
+        callback(new Error('Not allowed by CORS'));
+      },
       methods: ['GET', 'POST'],
       credentials: true,
     },

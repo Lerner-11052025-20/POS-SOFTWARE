@@ -7,9 +7,10 @@ import { formatCurrency } from '../../utils/format';
 import {
   Monitor, LayoutGrid, Users, Coffee, ArrowRight,
   CheckCircle2, XCircle, Clock, AlertCircle, Armchair,
-  ChevronRight, Layers, Wifi, WifiOff, RefreshCw
+  ChevronRight, Layers, Wifi, WifiOff, RefreshCw, QrCode
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import TableQRCodeModal from '../../components/floor/TableQRCodeModal';
 
 const STATUS_MAP = {
   available: { label: 'Available', color: 'emerald', icon: CheckCircle2 },
@@ -82,7 +83,7 @@ function TableLegend() {
   );
 }
 
-function TableCard({ table, isSelected, onSelect, disabled }) {
+function TableCard({ table, isSelected, onSelect, disabled, onGenerateQR }) {
   const status = table.status || 'available';
   const meta = STATUS_MAP[status] || STATUS_MAP.available;
   const isAvailable = status === 'available';
@@ -97,12 +98,23 @@ function TableCard({ table, isSelected, onSelect, disabled }) {
   }
 
   return (
-    <button
-      onClick={() => !disabled && isAvailable && onSelect(table)}
-      disabled={disabled || !isAvailable}
-      className={`relative w-full flex flex-col items-center justify-center rounded-[20px] border transition-all duration-300 py-6 px-2 bg-white ${stateClasses}`}
-      title={isAvailable ? `Select Table ${table.tableNumber}` : `Table ${table.tableNumber} — ${meta.label}`}
-    >
+    <div className={`relative w-full flex flex-col items-center justify-center rounded-[20px] border transition-all duration-300 py-6 px-2 bg-white ${stateClasses}`}>
+      {/* QR Button — top-right corner */}
+      <button
+        onClick={(e) => { e.stopPropagation(); onGenerateQR?.(table); }}
+        className="absolute top-2 right-2 w-8 h-8 rounded-lg bg-stone-50 border border-stone-100 flex items-center justify-center text-stone-400 hover:text-cafe-600 hover:bg-cafe-50 hover:border-cafe-200 transition-all z-10"
+        title={`Generate QR for Table ${table.tableNumber}`}
+      >
+        <QrCode className="w-3.5 h-3.5" />
+      </button>
+
+      {/* Clickable area for table selection */}
+      <button
+        onClick={() => !disabled && isAvailable && onSelect(table)}
+        disabled={disabled || !isAvailable}
+        className="w-full flex flex-col items-center justify-center"
+        title={isAvailable ? `Select Table ${table.tableNumber}` : `Table ${table.tableNumber} — ${meta.label}`}
+      >
       {/* Container for Pill and Dot */}
       <div className="relative inline-flex items-center justify-center mb-3 mt-1.5">
         {/* Table Number Pill */}
@@ -138,7 +150,8 @@ function TableCard({ table, isSelected, onSelect, disabled }) {
         }`}>
         {isSelected ? 'Selected' : meta.label}
       </span>
-    </button>
+      </button>
+    </div>
   );
 }
 
@@ -157,6 +170,7 @@ export default function POSTerminalFloorViewPage() {
   const [selectedFloor, setSelectedFloor] = useState(null);
   const [selectedTable, setSelectedTable] = useState(null);
   const [selectingTable, setSelectingTable] = useState(false);
+  const [qrModal, setQrModal] = useState({ open: false, table: null, token: null });
 
   const fetchConfig = useCallback(async () => {
     try {
@@ -245,6 +259,17 @@ export default function POSTerminalFloorViewPage() {
       fetchTables(selectedFloor._id);
     } finally {
       setSelectingTable(false);
+    }
+  };
+
+  const handleGenerateQR = async (table) => {
+    try {
+      const res = await tablesAPI.generateQR(table._id);
+      if (res.data.success) {
+        setQrModal({ open: true, table, token: res.data.qrToken });
+      }
+    } catch (err) {
+      toast.error('Failed to generate QR code');
     }
   };
 
@@ -404,6 +429,7 @@ export default function POSTerminalFloorViewPage() {
                           table={table}
                           isSelected={selectedTable?._id === table._id}
                           onSelect={handleTableSelect}
+                          onGenerateQR={handleGenerateQR}
                           disabled={selectingTable}
                         />
                       </div>
@@ -456,6 +482,14 @@ export default function POSTerminalFloorViewPage() {
           </div>
         </div>
       )}
+
+      {/* QR Code Modal */}
+      <TableQRCodeModal
+        isOpen={qrModal.open}
+        onClose={() => setQrModal({ open: false, table: null, token: null })}
+        table={qrModal.table}
+        qrToken={qrModal.token}
+      />
     </div>
   );
 }

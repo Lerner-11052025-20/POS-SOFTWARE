@@ -183,7 +183,7 @@ router.post('/:id/select', authorize('customer', 'cashier', 'manager'), async (r
 });
 
 // ─── POST /api/tables/:id/generate-qr — Generate QR Token ───────
-router.post('/:id/generate-qr', authorize('manager', 'cashier'), async (req, res) => {
+router.post('/:id/generate-qr', authorize('manager', 'cashier', 'customer'), async (req, res) => {
   try {
     const table = await Table.findById(req.params.id);
     if (!table) return res.status(404).json({ success: false, message: 'Table not found' });
