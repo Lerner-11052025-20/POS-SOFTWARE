@@ -71,6 +71,7 @@ export function AuthProvider({ children }) {
       cashier: '/pos/floor',
       customer: '/pos/terminal/default',
       manager: '/dashboard',
+      kitchen: '/kitchen',
     };
     return paths[role] || '/dashboard';
   }, []);

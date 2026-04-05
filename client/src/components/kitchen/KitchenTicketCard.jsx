@@ -6,8 +6,8 @@ const STATUS_CONFIG = {
   confirmed: { label: 'To Cook', dot: 'bg-blue-500', badge: 'bg-blue-50 text-blue-600 border-blue-100', next: 'preparing', nextLabel: 'Start Cooking' },
   preparing: { label: 'Preparing', dot: 'bg-amber-500', badge: 'bg-amber-50 text-amber-600 border-amber-100', next: 'ready', nextLabel: 'Mark Ready' },
   ready:     { label: 'Ready', dot: 'bg-emerald-500', badge: 'bg-emerald-50 text-emerald-600 border-emerald-100', next: 'served', nextLabel: 'Serve' },
-  served:    { label: 'Served', dot: 'bg-stone-400', badge: 'bg-stone-50 text-stone-500 border-stone-200', next: null, nextLabel: null },
-  completed: { label: 'Completed', dot: 'bg-stone-400', badge: 'bg-stone-50 text-stone-500 border-stone-200', next: null, nextLabel: null },
+  served:    { label: 'Served', dot: 'bg-emerald-500', badge: 'bg-emerald-50 text-emerald-600 border-emerald-100', next: 'completed', nextLabel: 'Complete' },
+  completed: { label: 'Completed', dot: 'bg-emerald-600', badge: 'bg-emerald-50 text-emerald-700 border-emerald-200', next: null, nextLabel: null },
   cancelled: { label: 'Cancelled', dot: 'bg-red-400', badge: 'bg-red-50 text-red-500 border-red-100', next: null, nextLabel: null },
 };
 
@@ -183,9 +183,9 @@ function KitchenTicketCard({ order, onItemPrepare, onStageChange, isHistory }) {
           </button>
         )}
 
-        {!isHistory && !config.next && order.status === 'ready' && (
+        {!isHistory && !config.next && order.status === 'completed' && (
           <span className="text-[10px] font-black text-emerald-600 uppercase tracking-wider flex items-center gap-1">
-            <CheckCircle2 className="w-3.5 h-3.5" /> Kitchen Complete
+            <CheckCircle2 className="w-3.5 h-3.5" /> Order Complete
           </span>
         )}
       </div>

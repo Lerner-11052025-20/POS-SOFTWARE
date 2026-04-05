@@ -21,7 +21,7 @@ router.get('/orders', authorize('manager', 'cashier', 'kitchen'), async (req, re
     if (stage && stage !== 'all') {
       filter.status = stage;
     } else {
-      filter.status = { $in: ['confirmed', 'preparing', 'ready'] };
+      filter.status = { $in: ['confirmed', 'preparing', 'ready', 'served', 'completed'] };
     }
 
     const orders = await Order.find(filter)

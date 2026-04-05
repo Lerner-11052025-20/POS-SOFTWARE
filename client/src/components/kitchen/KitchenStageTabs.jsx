@@ -3,6 +3,8 @@ const STAGES = [
   { id: 'confirmed', label: 'To Cook' },
   { id: 'preparing', label: 'Preparing' },
   { id: 'ready', label: 'Ready' },
+  { id: 'served', label: 'Served' },
+  { id: 'completed', label: 'Completed' },
 ];
 
 export default function KitchenStageTabs({ activeStage, onStageChange, stageCounts }) {
@@ -10,7 +12,7 @@ export default function KitchenStageTabs({ activeStage, onStageChange, stageCoun
     <div className="flex items-center gap-1 overflow-x-auto scrollbar-none pb-1">
       {STAGES.map(stage => {
         const count = stage.id === 'all'
-          ? (stageCounts.confirmed || 0) + (stageCounts.preparing || 0) + (stageCounts.ready || 0)
+          ? (stageCounts.confirmed || 0) + (stageCounts.preparing || 0) + (stageCounts.ready || 0) + (stageCounts.served || 0) + (stageCounts.completed || 0)
           : (stageCounts[stage.id] || 0);
         const isActive = activeStage === stage.id;
 

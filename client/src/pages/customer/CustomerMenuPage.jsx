@@ -68,8 +68,7 @@ export default function CustomerMenuPage() {
   useEffect(() => {
     // If no tableId and no state, redirect to floor view
     if (!tableId && !table) {
-      toast.error('No table selected');
-      navigate('/pos/terminal/default');
+      navigate('/pos/terminal/default', { replace: true });
       return;
     }
 

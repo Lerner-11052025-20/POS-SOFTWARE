@@ -21,8 +21,7 @@ const STAGES = [
   { id: 'confirmed', label: 'Confirmed', icon: CheckCircle2, description: 'Order received' },
   { id: 'preparing', label: 'Preparing', icon: ChefHat, description: 'Chef crafting' },
   { id: 'ready', label: 'Ready', icon: Bell, description: 'Hot & ready' },
-  { id: 'served', label: 'Served', icon: Coffee, description: 'Enjoy!' },
-  { id: 'completed', label: 'Completed', icon: ShoppingBag, description: 'Visit again' }
+  { id: 'served', label: 'Served', icon: Coffee, description: 'Enjoy!' }
 ];
 
 export default function OrderProgressPage() {
@@ -47,7 +46,7 @@ export default function OrderProgressPage() {
           }
         } catch (err) {
           toast.error('Could not load order tracking');
-          navigate('/customer/menu');
+          navigate('/pos/terminal/default');
         } finally {
           setLoading(false);
         }
@@ -91,7 +90,7 @@ export default function OrderProgressPage() {
           <Info className="w-12 h-12 text-stone-200 mb-4" />
           <h2 className="text-xl font-display font-black text-stone-800">Tracking Session Expired</h2>
           <p className="text-stone-400 text-sm mt-2 max-w-xs">We couldn't find your active order. Please check with our staff if your order is already served.</p>
-          <Link to="/customer/menu" className="mt-6 px-6 py-3 bg-stone-900 text-white rounded-xl font-bold">Return to Menu</Link>
+          <Link to="/pos/terminal/default" className="mt-6 px-6 py-3 bg-stone-900 text-white rounded-xl font-bold">Return to Menu</Link>
        </div>
     );
   }
@@ -101,7 +100,7 @@ export default function OrderProgressPage() {
       {/* Mini Header */}
       <header className="bg-white/80 backdrop-blur-md sticky top-0 z-40 border-b border-stone-100 px-6 py-3">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <Link to="/customer/menu" className="flex items-center gap-1.5 text-stone-400 hover:text-cafe-600 transition-colors">
+          <Link to="/pos/terminal/default" className="flex items-center gap-1.5 text-stone-400 hover:text-cafe-600 transition-colors">
             <ArrowLeft className="w-3.5 h-3.5" />
             <span className="text-[10px] font-display font-black uppercase tracking-widest">Back</span>
           </Link>

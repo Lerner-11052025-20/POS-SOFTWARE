@@ -3,10 +3,10 @@ const STAGE_META = {
   preparing: { index: 1, color: 'bg-amber-500' },
   ready:     { index: 2, color: 'bg-emerald-500' },
   served:    { index: 3, color: 'bg-emerald-500' },
-  completed: { index: 3, color: 'bg-emerald-500' },
+  completed: { index: 4, color: 'bg-emerald-600' },
 };
 
-const STAGES = ['Received', 'Cooking', 'Preparing', 'Ready'];
+const STAGES = ['Received', 'Cooking', 'Preparing', 'Ready', 'Completed'];
 
 export default function KitchenTicketProgressBar({ status, preparedCount, totalCount }) {
   const meta = STAGE_META[status] || STAGE_META.confirmed;

@@ -28,6 +28,17 @@ const ROLE_FEATURES = {
       { label: 'My Orders', path: '/customer', icon: LayoutGrid, ready: false },
     ],
   },
+  kitchen: {
+    title: 'Kitchen Station',
+    description: 'Your kitchen display is ready. Manage incoming orders, prepare items, and keep the flow going.',
+    icon: ChefHat,
+    color: 'from-orange-500 to-red-400',
+    quickActions: [
+      { label: 'Kitchen Display', path: '/kitchen', icon: ChefHat, ready: true },
+      { label: 'Customer Display', path: '/customer-display', icon: Monitor, ready: true },
+      { label: 'Order History', path: '/kitchen', icon: ClipboardList, ready: true },
+    ],
+  },
   manager: {
     title: 'Management Hub',
     description: 'Full control of operations. Monitor performance, configure settings, and manage staff.',
@@ -55,6 +66,11 @@ export default function Dashboard() {
   });
 
   const fetchStats = async () => {
+    // Kitchen and customer roles don't have access to POS/orders admin APIs
+    if (user?.role === 'kitchen' || user?.role === 'customer') {
+      setLoadingConfigs(false);
+      return;
+    }
     try {
       const [orderRes, paymentRes, configRes] = await Promise.all([
         ordersAPI.getAll({ status: 'confirmed,preparing,ready' }),
