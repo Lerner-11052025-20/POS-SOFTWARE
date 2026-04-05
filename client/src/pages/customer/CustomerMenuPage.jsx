@@ -220,7 +220,7 @@ export default function CustomerMenuPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-cream-50 overflow-hidden font-body">
+    <div className="h-screen flex flex-col bg-cream-50 overflow-hidden font-body">
       {/* Context Header */}
       <div className="bg-white border-b border-stone-100 px-6 py-3 shrink-0 shadow-sm z-30">
         <div className="max-w-screen-2xl mx-auto flex items-center justify-between">
@@ -344,8 +344,8 @@ export default function CustomerMenuPage() {
         </main>
 
         {/* Right Side: Order Summary Panel (Desktop) */}
-        <aside className="hidden lg:flex flex-col w-[380px] bg-white border-l border-stone-100 shadow-[inset_1px_0_0_0_rgba(0,0,0,0.02)] z-20">
-          <div className="px-6 py-5 border-b border-stone-100 flex items-center justify-between bg-stone-50/50">
+        <aside className="hidden lg:flex flex-col w-[380px] bg-white border-l border-stone-100 shadow-[inset_1px_0_0_0_rgba(0,0,0,0.02)] z-20 h-full sticky top-0">
+          <div className="px-6 py-5 border-b border-stone-100 flex items-center justify-between bg-stone-50/50 shrink-0">
             <h3 className="font-display font-black text-stone-900">Current Order</h3>
             <span className="px-2.5 py-1 bg-stone-200 text-stone-700 text-xs font-bold rounded-lg">{totalItems} Items</span>
           </div>
