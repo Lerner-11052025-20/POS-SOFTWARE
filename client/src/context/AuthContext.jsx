@@ -69,7 +69,6 @@ export function AuthProvider({ children }) {
   const getRoleRedirectPath = useCallback((role) => {
     const paths = {
       cashier: '/pos/floor',
-      kitchen: '/kitchen',
       customer: '/pos/terminal/default',
       manager: '/dashboard',
     };

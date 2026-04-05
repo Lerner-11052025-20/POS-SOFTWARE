@@ -17,16 +17,6 @@ const ROLE_FEATURES = {
       { label: 'New Order', path: '/pos/orders', icon: ShoppingBag, ready: false },
     ],
   },
-  kitchen: {
-    title: 'Kitchen Display',
-    description: 'Kitchen queue is live. Track incoming orders and update preparation status.',
-    icon: ChefHat,
-    color: 'from-amber-500 to-orange-500',
-    quickActions: [
-      { label: 'View Queue', path: '/kitchen', icon: ChefHat, ready: true },
-      { label: 'Active Orders', path: '/kitchen', icon: ShoppingBag, ready: true },
-    ],
-  },
   customer: {
     title: 'Customer Portal',
     description: 'Welcome! Browse menu, place orders, and track your order status in real time.',
@@ -101,14 +91,7 @@ export default function Dashboard() {
     
     // Real-time updates
     socket.connect();
-    socket.emit('join_kitchen_room'); // As kitchen listener for all order updates
-    
-    socket.on('kitchen_order_updated', () => {
-      fetchStats();
-    });
-
     return () => {
-      socket.off('kitchen_order_updated');
       socket.disconnect();
     };
   }, []);
@@ -184,36 +167,17 @@ export default function Dashboard() {
 
             {/* Live Stats Overlay */}
             <div className="flex gap-4 sm:gap-6 bg-black/10 backdrop-blur-md p-6 rounded-3xl border border-white/10 shrink-0">
-               {user.role === 'kitchen' ? (
-                 <>
-                   <div className="text-center">
-                      <p className="text-[10px] font-black opacity-60 uppercase tracking-widest mb-1">To Cook</p>
-                      <p className="text-2xl font-display font-black">{stats.pendingOrders}</p>
-                   </div>
-                   <div className="w-px h-10 bg-white/10 self-center" />
-                   <div className="text-center">
-                      <p className="text-[10px] font-black opacity-60 uppercase tracking-widest mb-1">Preparing</p>
-                      <p className="text-2xl font-display font-black text-amber-300">{stats.preparingOrders}</p>
-                   </div>
-                   <div className="w-px h-10 bg-white/10 self-center" />
-                   <div className="text-center">
-                      <p className="text-[10px] font-black opacity-60 uppercase tracking-widest mb-1">Ready</p>
-                      <p className="text-2xl font-display font-black text-emerald-300">{stats.readyOrders}</p>
-                   </div>
-                 </>
-               ) : (
-                 <>
-                   <div className="text-center min-w-[70px]">
-                      <p className="text-[10px] font-black opacity-60 uppercase tracking-widest mb-1">Sessions</p>
-                      <p className="text-2xl font-display font-black">{stats.activeSessions}</p>
-                   </div>
-                   <div className="w-px h-10 bg-white/10 self-center" />
-                   <div className="text-center min-w-[70px]">
-                      <p className="text-[10px] font-black opacity-60 uppercase tracking-widest mb-1">Live Queue</p>
-                      <p className="text-2xl font-display font-black">{stats.pendingOrders + stats.preparingOrders}</p>
-                   </div>
-                 </>
-               )}
+                  <>
+                    <div className="text-center min-w-[70px]">
+                       <p className="text-[10px] font-black opacity-60 uppercase tracking-widest mb-1">Sessions</p>
+                       <p className="text-2xl font-display font-black">{stats.activeSessions}</p>
+                    </div>
+                    <div className="w-px h-10 bg-white/10 self-center" />
+                    <div className="text-center min-w-[70px]">
+                       <p className="text-[10px] font-black opacity-60 uppercase tracking-widest mb-1">Live Queue</p>
+                       <p className="text-2xl font-display font-black">{stats.pendingOrders + stats.preparingOrders}</p>
+                    </div>
+                  </>
             </div>
           </div>
           <div className="absolute -right-8 -bottom-8 w-48 h-48 rounded-full bg-white/10 blur-2xl" />
