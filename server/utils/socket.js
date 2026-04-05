@@ -19,6 +19,11 @@ const init = (server) => {
       console.log(`Socket ${socket.id} joined room: order_${orderId}`);
     });
 
+    socket.on('join_kitchen_room', () => {
+      socket.join('kitchen');
+      console.log(`Socket ${socket.id} joined KITCHEN room`);
+    });
+
     socket.on('disconnect', () => {
       console.log('Client disconnected:', socket.id);
     });
@@ -36,8 +41,13 @@ const getIO = () => {
 
 const emitOrderUpdate = (orderId, statusData) => {
   if (io) {
+    // 1. Notify specific order room (Customer)
     io.to(`order_${orderId}`).emit('order_status_updated', statusData);
-    console.log(`Emitted update for order_${orderId}:`, statusData.status);
+    
+    // 2. Notify kitchen room (Staff)
+    io.to('kitchen').emit('kitchen_order_updated', { orderId, ...statusData });
+    
+    console.log(`Emitted update for order_${orderId} and KITCHEN:`, statusData.status);
   }
 };
 

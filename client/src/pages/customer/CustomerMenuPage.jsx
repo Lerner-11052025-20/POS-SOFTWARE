@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { categoriesAPI, productsAPI, ordersAPI } from '../../services/api';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { categoriesAPI, productsAPI, ordersAPI, tablesAPI, floorsAPI } from '../../services/api';
 import Navbar from '../../components/layout/Navbar';
 import { formatCurrency } from '../../utils/format';
 import {
@@ -47,9 +47,12 @@ const getProductFallbackImage = (name, categoryName = '') => {
 };
 
 export default function CustomerMenuPage() {
+  const { tableId } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const { table, floor } = location.state || {};
+  
+  const [table, setTable] = useState(location.state?.table || null);
+  const [floor, setFloor] = useState(location.state?.floor || null);
 
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
@@ -63,7 +66,9 @@ export default function CustomerMenuPage() {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   useEffect(() => {
-    if (!table) {
+    // If no tableId and no state, redirect to floor view
+    if (!tableId && !table) {
+      toast.error('No table selected');
       navigate('/pos/terminal/default');
       return;
     }
@@ -71,6 +76,33 @@ export default function CustomerMenuPage() {
     const fetchData = async () => {
       try {
         setLoading(true);
+
+        // 1. If we have tableId but no table details, fetch them (Refresh case)
+        if (tableId && !table) {
+          const tableRes = await tablesAPI.getAll({ _id: tableId });
+          const foundTable = tableRes.data.tables.find(t => t._id === tableId);
+          
+          if (!foundTable) {
+            toast.error('Table not found');
+            navigate('/pos/terminal/default');
+            return;
+          }
+
+          // Security: Check if current user owns this reservation
+          if (foundTable.status !== 'reserved') {
+             toast.error('Session expired or table released');
+             navigate('/pos/terminal/default');
+             return;
+          }
+
+          setTable(foundTable);
+          
+          // Optionally fetch floor details
+          const floorRes = await floorsAPI.getAll({ _id: foundTable.floor });
+          setFloor(floorRes.data.floors[0]);
+        }
+
+        // 2. Fetch Menu
         const [catRes, prodRes] = await Promise.all([
           categoriesAPI.getAll(),
           productsAPI.getAll({ active: 'true' })
@@ -79,13 +111,14 @@ export default function CustomerMenuPage() {
         setProducts(prodRes.data.products || []);
       } catch (err) {
         console.error('Fetch menu error:', err);
-        toast.error('Failed to load menu');
+        toast.error('Failed to load menu session');
+        navigate('/pos/terminal/default');
       } finally {
         setLoading(false);
       }
     };
     fetchData();
-  }, [table, navigate]);
+  }, [tableId, table, navigate]);
 
   const filteredProducts = useMemo(() => {
     return products.filter(p => {

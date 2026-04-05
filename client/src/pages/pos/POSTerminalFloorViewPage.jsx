@@ -236,7 +236,7 @@ export default function POSTerminalFloorViewPage() {
       const res = await tablesAPI.select(selectedTable._id);
       if (res.data.success) {
         toast.success(`Table ${selectedTable.tableNumber} secured!`);
-        navigate('/customer/menu', { state: { table: res.data.table, floor: selectedFloor } });
+        navigate(`/customer/menu/${selectedTable._id}`, { state: { table: res.data.table, floor: selectedFloor } });
       }
     } catch (err) {
       const msg = err.response?.data?.message || 'Could not reserve table. Please try another.';

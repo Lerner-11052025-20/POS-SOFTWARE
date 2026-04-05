@@ -7,7 +7,7 @@ const router = express.Router();
 router.use(protect);
 
 // GET /api/orders — List all orders
-router.get('/', authorize('manager', 'cashier'), async (req, res) => {
+router.get('/', authorize('manager', 'cashier', 'kitchen'), async (req, res) => {
   try {
     const { status, archived } = req.query;
     const filter = {};
@@ -29,7 +29,7 @@ router.get('/', authorize('manager', 'cashier'), async (req, res) => {
 });
 
 // GET /api/orders/:id — Single order detail
-router.get('/:id', authorize('manager', 'cashier'), async (req, res) => {
+router.get('/:id', authorize('manager', 'cashier', 'kitchen'), async (req, res) => {
   try {
     const order = await Order.findById(req.params.id)
       .populate('customer', 'name email phone')
@@ -66,10 +66,10 @@ router.post('/', authorize('manager', 'cashier', 'customer'), async (req, res) =
       .populate('createdBy', 'fullName');
 
     // Notify listeners about new order (Kitchen)
-    emitOrderUpdate(order._id, { 
-      status: 'confirmed', 
+    emitOrderUpdate(order._id, {
+      status: 'confirmed',
       message: 'New order confirmed',
-      order: populated 
+      order: populated
     });
 
     res.status(201).json({ success: true, order: populated });
@@ -123,7 +123,7 @@ router.patch('/:id/status', authorize('manager', 'cashier', 'kitchen'), async (r
   try {
     const { status, message } = req.body;
     const allowedStatuses = ['confirmed', 'preparing', 'ready', 'served', 'completed', 'cancelled'];
-    
+
     if (!allowedStatuses.includes(status)) {
       return res.status(400).json({ success: false, message: 'Invalid status' });
     }
@@ -139,10 +139,10 @@ router.patch('/:id/status', authorize('manager', 'cashier', 'kitchen'), async (r
     }
 
     // Emit real-time update to customer room
-    emitOrderUpdate(order._id, { 
-      status, 
+    emitOrderUpdate(order._id, {
+      status,
       message: message || `Order switched to ${status}`,
-      updatedAt: order.updatedAt 
+      updatedAt: order.updatedAt
     });
 
     res.json({ success: true, order });
@@ -157,7 +157,7 @@ router.patch('/:orderId/items/:lineId/prepared', authorize('manager', 'kitchen')
   try {
     const { isPrepared } = req.body;
     const order = await Order.findById(req.params.orderId);
-    
+
     if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
 
     const lineItem = order.lines.id(req.params.lineId);
@@ -169,10 +169,10 @@ router.patch('/:orderId/items/:lineId/prepared', authorize('manager', 'kitchen')
     await order.save();
 
     // Notify listeners (including customer if they are on progress screen)
-    emitOrderUpdate(order._id, { 
-      status: order.status, 
+    emitOrderUpdate(order._id, {
+      status: order.status,
       message: `Item ${lineItem.product} is ${isPrepared ? 'done' : 'pending'}`,
-      updatedAt: Date.now() 
+      updatedAt: Date.now()
     });
 
     res.json({ success: true, order });

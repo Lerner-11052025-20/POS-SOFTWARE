@@ -9,6 +9,7 @@ import FloorManagementPage from './pages/pos/FloorManagementPage';
 import POSTerminalFloorViewPage from './pages/pos/POSTerminalFloorViewPage';
 import CustomerMenuPage from './pages/customer/CustomerMenuPage';
 import OrderProgressPage from './pages/customer/OrderProgressPage';
+import CustomerDisplayPage from './pages/customer/CustomerDisplayPage';
 import KitchenDisplayPage from './pages/pos/KitchenDisplayPage';
 import UnauthorizedPage from './pages/UnauthorizedPage';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -144,7 +145,7 @@ export default function App() {
         }
       />
       <Route
-        path="/customer/menu"
+        path="/customer/menu/:tableId?"
         element={
           <ProtectedRoute allowedRoles={['customer', 'cashier', 'manager']}>
             <CustomerMenuPage />
@@ -161,10 +162,19 @@ export default function App() {
       />
 
       <Route
-        path="/customer/order-progress"
+        path="/customer/order-progress/:orderId?"
         element={
           <ProtectedRoute allowedRoles={['customer', 'cashier', 'manager']}>
             <OrderProgressPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/customer-display"
+        element={
+          <ProtectedRoute allowedRoles={['customer', 'cashier', 'manager', 'kitchen']}>
+            <CustomerDisplayPage />
           </ProtectedRoute>
         }
       />

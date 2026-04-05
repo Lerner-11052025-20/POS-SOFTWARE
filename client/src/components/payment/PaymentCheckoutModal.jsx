@@ -79,7 +79,7 @@ export default function PaymentCheckoutModal({ isOpen, onClose, orderTotal, orde
             if (verifyRes.data.success) {
               toast.success('Order Placed Successfully!', { id: toastId });
               onSuccess(); // Clear cart in Menu page
-              navigate('/customer/order-progress', { state: { order: localOrder } });
+              navigate(`/customer/order-progress/${localOrder._id}`, { state: { order: localOrder } });
             } else {
               toast.error('Payment Verification Failed.', { id: toastId });
               setIsProcessing(false);

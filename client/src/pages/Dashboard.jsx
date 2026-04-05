@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { posAPI } from '../services/api';
-import { LogOut, Coffee, Monitor, LayoutGrid, ChefHat, ShoppingBag, BarChart3, Settings, ClipboardList, ArrowRight, Terminal } from 'lucide-react';
+import api, { posAPI, ordersAPI, paymentsAPI } from '../services/api';
+import socket from '../services/socket';
+import { LogOut, Coffee, Monitor, LayoutGrid, ChefHat, ShoppingBag, BarChart3, Settings, ClipboardList, ArrowRight, Terminal, Clock, CreditCard, Activity } from 'lucide-react';
 
 const ROLE_FEATURES = {
   cashier: {
@@ -22,8 +23,8 @@ const ROLE_FEATURES = {
     icon: ChefHat,
     color: 'from-amber-500 to-orange-500',
     quickActions: [
-      { label: 'View Queue', path: '/kitchen', icon: ChefHat, ready: false },
-      { label: 'Active Orders', path: '/kitchen', icon: ShoppingBag, ready: false },
+      { label: 'View Queue', path: '/kitchen', icon: ChefHat, ready: true },
+      { label: 'Active Orders', path: '/kitchen', icon: ShoppingBag, ready: true },
     ],
   },
   customer: {
@@ -55,21 +56,61 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [configs, setConfigs] = useState([]);
   const [loadingConfigs, setLoadingConfigs] = useState(true);
+  const [stats, setStats] = useState({
+    pendingOrders: 0,
+    preparingOrders: 0,
+    readyOrders: 0,
+    dailyRevenue: 0,
+    activeSessions: 0
+  });
+
+  const fetchStats = async () => {
+    try {
+      const [orderRes, paymentRes, configRes] = await Promise.all([
+        ordersAPI.getAll({ status: 'confirmed,preparing,ready' }),
+        paymentsAPI.getGrouped(),
+        posAPI.getConfigs()
+      ]);
+
+      if (orderRes.data.success) {
+        const orders = orderRes.data.orders;
+        setStats(prev => ({
+          ...prev,
+          pendingOrders: orders.filter(o => o.status === 'confirmed').length,
+          preparingOrders: orders.filter(o => o.status === 'preparing').length,
+          readyOrders: orders.filter(o => o.status === 'ready').length
+        }));
+      }
+
+      if (configRes.data.success) {
+        setConfigs(configRes.data.configs);
+        setStats(prev => ({
+          ...prev,
+          activeSessions: configRes.data.configs.filter(c => c.isSessionActive).length
+        }));
+      }
+    } catch (err) {
+      console.error('Stats fetch error:', err);
+    } finally {
+      setLoadingConfigs(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchConfigs = async () => {
-      try {
-        const res = await posAPI.getConfigs();
-        if (res.data.success) {
-          setConfigs(res.data.configs);
-        }
-      } catch (err) {
-        console.error('Fetch configs error:', err);
-      } finally {
-        setLoadingConfigs(false);
-      }
+    fetchStats();
+    
+    // Real-time updates
+    socket.connect();
+    socket.emit('join_kitchen_room'); // As kitchen listener for all order updates
+    
+    socket.on('kitchen_order_updated', () => {
+      fetchStats();
+    });
+
+    return () => {
+      socket.off('kitchen_order_updated');
+      socket.disconnect();
     };
-    fetchConfigs();
   }, []);
 
   if (!user) return null;
@@ -123,21 +164,57 @@ export default function Dashboard() {
 
 
         <div className={`relative overflow-hidden rounded-3xl bg-gradient-to-br ${roleData.color} p-8 sm:p-12 text-white mb-8 animate-fade-in-up`}>
-          <div className="relative z-10">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                <RoleIcon className="w-6 h-6 text-white" />
+          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8">
+            <div>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                  <RoleIcon className="w-6 h-6 text-white" />
+                </div>
+                <span className="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-semibold capitalize">
+                  {user.role} Access
+                </span>
               </div>
-              <span className="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-semibold capitalize">
-                {user.role} Access
-              </span>
+              <h2 className="text-3xl sm:text-4xl font-display font-bold mb-2">
+                Welcome, {user.fullName}!
+              </h2>
+              <p className="text-white/80 text-sm sm:text-base max-w-lg leading-relaxed">
+                {roleData.description}
+              </p>
             </div>
-            <h2 className="text-3xl sm:text-4xl font-display font-bold mb-2">
-              Welcome, {user.fullName}!
-            </h2>
-            <p className="text-white/80 text-sm sm:text-base max-w-lg leading-relaxed">
-              {roleData.description}
-            </p>
+
+            {/* Live Stats Overlay */}
+            <div className="flex gap-4 sm:gap-6 bg-black/10 backdrop-blur-md p-6 rounded-3xl border border-white/10 shrink-0">
+               {user.role === 'kitchen' ? (
+                 <>
+                   <div className="text-center">
+                      <p className="text-[10px] font-black opacity-60 uppercase tracking-widest mb-1">To Cook</p>
+                      <p className="text-2xl font-display font-black">{stats.pendingOrders}</p>
+                   </div>
+                   <div className="w-px h-10 bg-white/10 self-center" />
+                   <div className="text-center">
+                      <p className="text-[10px] font-black opacity-60 uppercase tracking-widest mb-1">Preparing</p>
+                      <p className="text-2xl font-display font-black text-amber-300">{stats.preparingOrders}</p>
+                   </div>
+                   <div className="w-px h-10 bg-white/10 self-center" />
+                   <div className="text-center">
+                      <p className="text-[10px] font-black opacity-60 uppercase tracking-widest mb-1">Ready</p>
+                      <p className="text-2xl font-display font-black text-emerald-300">{stats.readyOrders}</p>
+                   </div>
+                 </>
+               ) : (
+                 <>
+                   <div className="text-center min-w-[70px]">
+                      <p className="text-[10px] font-black opacity-60 uppercase tracking-widest mb-1">Sessions</p>
+                      <p className="text-2xl font-display font-black">{stats.activeSessions}</p>
+                   </div>
+                   <div className="w-px h-10 bg-white/10 self-center" />
+                   <div className="text-center min-w-[70px]">
+                      <p className="text-[10px] font-black opacity-60 uppercase tracking-widest mb-1">Live Queue</p>
+                      <p className="text-2xl font-display font-black">{stats.pendingOrders + stats.preparingOrders}</p>
+                   </div>
+                 </>
+               )}
+            </div>
           </div>
           <div className="absolute -right-8 -bottom-8 w-48 h-48 rounded-full bg-white/10 blur-2xl" />
           <div className="absolute right-12 top-8 w-24 h-24 rounded-full bg-white/5 blur-xl" />
