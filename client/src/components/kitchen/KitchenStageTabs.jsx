@@ -1,37 +1,39 @@
-const STAGES = [
-  { id: 'all', label: 'All Active' },
-  { id: 'confirmed', label: 'To Cook' },
-  { id: 'preparing', label: 'Preparing' },
-  { id: 'ready', label: 'Ready' },
-  { id: 'served', label: 'Served' },
-  { id: 'completed', label: 'Completed' },
+const TABS = [
+  { id: 'all', label: 'All' },
+  { id: 'confirmed', label: 'Order Received' },
+  { id: 'preparing', label: 'Cooking' },
+  { id: 'ready', label: 'Ready for Pickup' },
 ];
 
 export default function KitchenStageTabs({ activeStage, onStageChange, stageCounts }) {
   return (
-    <div className="flex items-center gap-1 overflow-x-auto scrollbar-none pb-1">
-      {STAGES.map(stage => {
-        const count = stage.id === 'all'
-          ? (stageCounts.confirmed || 0) + (stageCounts.preparing || 0) + (stageCounts.ready || 0) + (stageCounts.served || 0) + (stageCounts.completed || 0)
-          : (stageCounts[stage.id] || 0);
-        const isActive = activeStage === stage.id;
+    <div className="flex items-center gap-1 overflow-x-auto scrollbar-none -mb-px">
+      {TABS.map(tab => {
+        const count = tab.id === 'all'
+          ? (stageCounts.confirmed || 0) + (stageCounts.preparing || 0) + (stageCounts.ready || 0)
+          : (stageCounts[tab.id] || 0);
+        const isActive = activeStage === tab.id;
 
         return (
           <button
-            key={stage.id}
-            onClick={() => onStageChange(stage.id)}
-            className={`h-10 px-4 rounded-xl flex items-center gap-2.5 transition-all whitespace-nowrap ${
+            key={tab.id}
+            onClick={() => onStageChange(tab.id)}
+            className={`relative h-11 px-4 flex items-center gap-2 text-sm font-semibold whitespace-nowrap transition-colors ${
               isActive
-                ? 'bg-stone-900 text-white shadow-md'
-                : 'text-stone-500 hover:bg-stone-50 hover:text-stone-700'
+                ? 'text-stone-900'
+                : 'text-stone-400 hover:text-stone-600'
             }`}
           >
-            <span className="text-xs font-bold uppercase tracking-wider">{stage.label}</span>
-            <span className={`min-w-[22px] h-[22px] rounded-md flex items-center justify-center text-[10px] font-black ${
-              isActive ? 'bg-white/20 text-white' : 'bg-stone-100 text-stone-500'
+            {tab.label}
+            <span className={`min-w-[20px] h-5 px-1.5 rounded-md flex items-center justify-center text-[11px] font-bold ${
+              isActive ? 'bg-stone-900 text-white' : 'bg-stone-100 text-stone-500'
             }`}>
               {count}
             </span>
+            {/* Active underline */}
+            {isActive && (
+              <span className="absolute bottom-0 left-2 right-2 h-0.5 bg-stone-900 rounded-full" />
+            )}
           </button>
         );
       })}

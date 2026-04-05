@@ -21,7 +21,7 @@ router.get('/orders', authorize('manager', 'cashier', 'kitchen'), async (req, re
     if (stage && stage !== 'all') {
       filter.status = stage;
     } else {
-      filter.status = { $in: ['confirmed', 'preparing', 'ready', 'served', 'completed'] };
+      filter.status = { $in: ['confirmed', 'preparing', 'ready'] };
     }
 
     const orders = await Order.find(filter)
@@ -47,7 +47,7 @@ router.get('/orders/history', authorize('manager', 'cashier', 'kitchen'), async 
   try {
     const orders = await Order.find({
       sentToKitchen: true,
-      status: { $in: ['served', 'completed', 'cancelled'] },
+      status: { $in: ['served', 'cancelled'] },
       isArchived: false,
     })
       .populate('customer', 'name email phone')
@@ -175,7 +175,7 @@ router.patch(
   async (req, res) => {
     try {
       const { stage } = req.body;
-      const allowedStages = ['confirmed', 'preparing', 'ready', 'served', 'completed'];
+      const allowedStages = ['confirmed', 'preparing', 'ready', 'served'];
 
       if (!allowedStages.includes(stage)) {
         return res.status(400).json({ success: false, message: 'Invalid kitchen stage' });
@@ -189,7 +189,7 @@ router.patch(
       if (stage === 'preparing' && !order.kitchenStartedAt) {
         order.kitchenStartedAt = new Date();
       }
-      if (['ready', 'served', 'completed'].includes(stage) && !order.kitchenCompletedAt) {
+      if (['ready', 'served'].includes(stage) && !order.kitchenCompletedAt) {
         order.kitchenCompletedAt = new Date();
       }
 

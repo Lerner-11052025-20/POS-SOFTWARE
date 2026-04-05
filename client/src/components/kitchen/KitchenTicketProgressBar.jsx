@@ -1,65 +1,61 @@
-const STAGE_META = {
-  confirmed: { index: 0, color: 'bg-blue-500' },
-  preparing: { index: 1, color: 'bg-amber-500' },
-  ready:     { index: 2, color: 'bg-emerald-500' },
-  served:    { index: 3, color: 'bg-emerald-500' },
-  completed: { index: 4, color: 'bg-emerald-600' },
-};
+const STAGES = [
+  { label: 'Received', status: 'confirmed' },
+  { label: 'Cooking', status: 'preparing' },
+  { label: 'Ready', status: 'ready' },
+  { label: 'Served', status: 'served' },
+];
 
-const STAGES = ['Received', 'Cooking', 'Preparing', 'Ready', 'Completed'];
+const STATUS_INDEX = { confirmed: 0, preparing: 1, ready: 2, served: 3 };
 
 export default function KitchenTicketProgressBar({ status, preparedCount, totalCount }) {
-  const meta = STAGE_META[status] || STAGE_META.confirmed;
-  const activeIdx = meta.index;
-  const itemPercent = totalCount > 0 ? Math.round((preparedCount / totalCount) * 100) : 0;
+  const activeIdx = STATUS_INDEX[status] ?? 0;
+  const pct = totalCount > 0 ? Math.round((preparedCount / totalCount) * 100) : 0;
 
   return (
-    <div className="space-y-2">
-      {/* Stage dots + connecting line */}
-      <div className="relative flex items-center justify-between px-1">
-        {/* Track line */}
-        <div className="absolute inset-x-3 top-1/2 -translate-y-1/2 h-[2px] bg-stone-100 rounded-full" />
-        {/* Filled track */}
+    <div className="space-y-2.5">
+      {/* Stage dots */}
+      <div className="relative flex items-center justify-between">
+        {/* Track */}
+        <div className="absolute inset-x-4 top-[10px] h-0.5 bg-stone-100 rounded-full" />
         <div
-          className="absolute left-3 top-1/2 -translate-y-1/2 h-[2px] bg-gradient-to-r from-cafe-500 to-amber-400 rounded-full transition-all duration-700"
-          style={{ width: `${(activeIdx / (STAGES.length - 1)) * 100}%` }}
+          className="absolute left-4 top-[10px] h-0.5 bg-cafe-500 rounded-full transition-all duration-700"
+          style={{ width: `${(activeIdx / (STAGES.length - 1)) * (100 - 8)}%` }}
         />
 
-        {STAGES.map((label, idx) => {
-          const isCompleted = idx < activeIdx;
-          const isActive = idx === activeIdx;
-
+        {STAGES.map((s, idx) => {
+          const done = idx < activeIdx;
+          const active = idx === activeIdx;
           return (
-            <div key={label} className="relative z-10 flex flex-col items-center gap-1">
-              <div
-                className={`w-3 h-3 rounded-full border-2 transition-all duration-500 ${
-                  isCompleted
-                    ? 'bg-cafe-500 border-cafe-500'
-                    : isActive
-                      ? 'bg-white border-cafe-500 ring-2 ring-cafe-200'
-                      : 'bg-white border-stone-200'
-                }`}
-              />
-              <span className={`text-[8px] font-bold uppercase tracking-wider ${
-                isActive ? 'text-stone-600' : isCompleted ? 'text-stone-400' : 'text-stone-300'
+            <div key={s.status} className="relative z-10 flex flex-col items-center">
+              <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold transition-all duration-500 ${
+                done
+                  ? 'bg-cafe-500 text-white'
+                  : active
+                    ? 'bg-white border-2 border-cafe-500 text-cafe-600'
+                    : 'bg-white border-2 border-stone-200 text-stone-300'
               }`}>
-                {label}
+                {done ? '✓' : idx + 1}
+              </div>
+              <span className={`text-[9px] font-semibold mt-1 ${
+                active ? 'text-stone-700' : done ? 'text-stone-400' : 'text-stone-300'
+              }`}>
+                {s.label}
               </span>
             </div>
           );
         })}
       </div>
 
-      {/* Item progress mini-bar */}
+      {/* Item progress bar */}
       {totalCount > 0 && (
-        <div className="flex items-center gap-2 px-1">
+        <div className="flex items-center gap-2">
           <div className="flex-1 h-1 bg-stone-100 rounded-full overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-cafe-500 to-amber-400 rounded-full transition-all duration-500"
-              style={{ width: `${itemPercent}%` }}
+              className="h-full bg-cafe-500 rounded-full transition-all duration-500"
+              style={{ width: `${pct}%` }}
             />
           </div>
-          <span className="text-[9px] font-bold text-stone-400 tabular-nums whitespace-nowrap">
+          <span className="text-[10px] font-semibold text-stone-400 tabular-nums">
             {preparedCount}/{totalCount}
           </span>
         </div>
